@@ -20,6 +20,10 @@
 //		@property radius
 //	is declared in MKCircle
 //
+//	NOTE: MapOverlayPathStyle implements just *some* of the properties
+//	common to both MKOverlayPathView and MKOverlayPathRenderer,
+//	remaining properties (lineCap, miterLimit, etc.) could be added as needed
+//
 //	Created by Steve Caine on 05/29/14.
 //
 //	This code is distributed under the terms of the MIT license.
@@ -33,16 +37,16 @@
 #import <CoreLocation/CoreLocation.h>
 
 // ----------------------------------------------------------------------
-#pragma mark   MapOverlayStyle
+#pragma mark   MapOverlayPathStyle
 // ----------------------------------------------------------------------
 
-@interface MapOverlayStyle : NSObject
+@interface MapOverlayPathStyle : NSObject
 
 @property (assign, nonatomic) CGFloat  lineWidth;
 @property (strong, nonatomic) UIColor *strokeColor;
 @property (strong, nonatomic) UIColor *fillColor;
 
-+ (MapOverlayStyle *)randomStyle;
++ (MapOverlayPathStyle *)randomStyle;
 
 @end
 
@@ -60,12 +64,26 @@
 @end
 
 // ----------------------------------------------------------------------
+#pragma mark - MapOverlay
+// ----------------------------------------------------------------------
+
+@interface MapOverlay : NSObject <MKOverlay>
+
+- (MKOverlayView *)overlayView;
+#ifdef __IPHONE_7_0
+- (MKOverlayRenderer *)overlayRenderer;
+#endif
+
+@end
+
+#if 0
+// ----------------------------------------------------------------------
 #pragma mark - MapOverlayCircle
 // ----------------------------------------------------------------------
 
-@interface MapOverlayCircle : NSObject <MKOverlay> // MKCircle //
+@interface MapOverlayCircle : MapOverlay // MKCircle //
 
-- (MKOverlayPathView *)overlayView;
+//- (MKOverlayPathView *)overlayView;
 
 @end
 
@@ -73,9 +91,9 @@
 #pragma mark - MapOverlayPolygon
 // ----------------------------------------------------------------------
 
-@interface MapOverlayPolygon : NSObject <MKOverlay> // MKPolygon //
+@interface MapOverlayPolygon : MapOverlay // MKPolygon //
 
-- (MKOverlayPathView *)overlayView;
+//- (MKOverlayPathView *)overlayView;
 
 @end
 
@@ -83,9 +101,9 @@
 #pragma mark - MapOverlayPolyline
 // ----------------------------------------------------------------------
 
-@interface MapOverlayPolyline : NSObject <MKOverlay> // MKPolyline //
+@interface MapOverlayPolyline : MapOverlay // MKPolyline //
 
-- (MKOverlayPathView *)overlayView;
+//- (MKOverlayPathView *)overlayView;
 
 @end
 
@@ -93,11 +111,12 @@
 #pragma mark - MapOverlayRegion
 // ----------------------------------------------------------------------
 
-@interface MapOverlayRegion : NSObject <MKOverlay> // MKPolygon //
+@interface MapOverlayRegion : MapOverlay // MKPolygon //
 
-- (MKOverlayPathView *)overlayView;
+//- (MKOverlayPathView *)overlayView;
 
 @end
+#endif
 
 // ----------------------------------------------------------------------
 #pragma mark - MapOverlays

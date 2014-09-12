@@ -60,7 +60,7 @@
 
 - (void)viewDidLoad {
 //	MyLog(@"\n%s", __FUNCTION__);
-	MyLog(@"\n%s for %s\n", __FUNCTION__, (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0") ? "iOS 7" : "iOS 6"));
+	MyLog(@"\n%s for %@\n", __FUNCTION__, str_iOS_version());
 	[super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
 	self.mapView.mapType = MKMapTypeStandard;
@@ -84,7 +84,7 @@
 	
 	MKCoordinateRegion viewRegion = MKCoordinateRegionMakeWithDistance(newLocation.coordinate, 2000, 2000);
 	
-	MKCoordinateRegion adjustedRegion = [self.mapView regionThatFits:viewRegion];
+	MKCoordinateRegion adjustedRegion = [self.mapView regionThatFits:viewRegion]; // unnecessary?
 	
 	[self.mapView setRegion:adjustedRegion animated:YES];
 	
@@ -94,6 +94,7 @@
 	aManager.delegate = nil;
 	[aManager stopUpdatingLocation];
 
+	// one more annotation, this one right on top of our location
 	MapAnnotationPoint *youAreHere = [MapUtil mapView:self.mapView addAnnotationForCoordinate:newLocation.coordinate];
 	youAreHere.title = @"You Are Here!";
 	youAreHere.subtitle = @"This is here ... for certain!";
@@ -139,6 +140,14 @@
 //	MyLog(@"%s returns %@", __FUNCTION__, result);
 	return result;
 }
+
+#ifdef __IPHONE_7_0
+- (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id < MKOverlay >)overlay {
+	MKOverlayRenderer *result = nil;
+	result = [MapUtil mapView:mapView rendererForOverlay:overlay];
+	return result;
+}
+#endif
 
 - (void)mapViewDidFailLoadingMap:(MKMapView *)aMapView withError:(NSError *)error {
 	NSLog(@"%s %@", __FUNCTION__, error);

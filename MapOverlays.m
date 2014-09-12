@@ -23,13 +23,13 @@
 #import "Debug_MapKit.h"
 
 // ----------------------------------------------------------------------
-#pragma mark   MapOverlayStyle
+#pragma mark   MapOverlayPathStyle
 // ----------------------------------------------------------------------
 
-@implementation MapOverlayStyle
+@implementation MapOverlayPathStyle
 
-+ (MapOverlayStyle *)randomStyle {
-	MapOverlayStyle *result = [[MapOverlayStyle alloc] init];
++ (MapOverlayPathStyle *)randomStyle {
+	MapOverlayPathStyle *result = [[MapOverlayPathStyle alloc] init];
 	
 	CGFloat r1 = randomFloatInRange(0, 1);
 	CGFloat g1 = randomFloatInRange(0, 1);
@@ -102,30 +102,76 @@
 @end
 
 // ----------------------------------------------------------------------
+#pragma mark - MapOverlay - ABSTRACT BASE CLASS
+// ----------------------------------------------------------------------
+
+@implementation MapOverlay
+- (id) initWithStyle:(MapOverlayPathStyle *)style {
+	self = [super init];
+	if (self) {
+		_style = style;
+	}
+	return self;
+}
+- (CLLocationCoordinate2D) coordinate {
+#ifdef DEBUG
+	NSException *exception = [NSException exceptionWithName:@"AbstractClassInstanceException" reason:@"Abstract class 'MapOverlay' should never be instantiated." userInfo:nil];
+	@throw exception;
+#endif
+	CLLocationCoordinate2D result = {0,0};
+	return result;
+}
+- (MKMapRect) boundingMapRect {
+#ifdef DEBUG
+	NSException *exception = [NSException exceptionWithName:@"AbstractClassInstanceException" reason:@"Abstract class 'MapOverlay' should never be instantiated." userInfo:nil];
+	@throw exception;
+#endif
+	MKMapRect result = {0,0,0,0};
+	return result;
+}
+- (MKOverlayPathView *)overlayView {
+	MKOverlayPathView *result = nil;
+#ifdef DEBUG
+	NSException *exception = [NSException exceptionWithName:@"AbstractClassInstanceException" reason:@"Abstract class 'MapOverlay' should never be instantiated." userInfo:nil];
+	@throw exception;
+#endif
+	return result;
+}
+#ifdef __IPHONE_7_0
+- (MKOverlayRenderer *)overlayRenderer {
+	MKOverlayRenderer *result = nil;
+#ifdef DEBUG
+	NSException *exception = [NSException exceptionWithName:@"AbstractClassInstanceException" reason:@"Abstract class 'MapOverlay' should never be instantiated." userInfo:nil];
+	@throw exception;
+#endif
+	return result;
+}
+#endif
+@end
+
+// ----------------------------------------------------------------------
 #pragma mark - MapOverlayCircle
 // ----------------------------------------------------------------------
 
 @implementation MapOverlayCircle
 
-+ (MapOverlayCircle *)circleWithCenterCoordinate:(CLLocationCoordinate2D)center radius:(CLLocationDistance)radius style:(MapOverlayStyle *)style {
++ (MapOverlayCircle *)circleWithCenterCoordinate:(CLLocationCoordinate2D)center radius:(CLLocationDistance)radius style:(MapOverlayPathStyle *)style {
 	MapOverlayCircle *result = [[MapOverlayCircle alloc] initWithCenterCoordinate:center radius:radius style:style];
 	return result;
 }
 
-- (id) initWithCenterCoordinate:(CLLocationCoordinate2D)center radius:(CLLocationDistance)radius style:(MapOverlayStyle *)style {
+- (id)initWithCenterCoordinate:(CLLocationCoordinate2D)center radius:(CLLocationDistance)radius style:(MapOverlayPathStyle *)style {
 	self = [super init];
 	if (self) {
 		_circle = [MKCircle circleWithCenterCoordinate:center radius:radius];
-		_style = style;
 	}
 	return self;
 }
 
-- (id) initWithCircle:(MKCircle *)circle style:(MapOverlayStyle *)style {
-	self = [super init];
+- (id)initWithCircle:(MKCircle *)circle style:(MapOverlayPathStyle *)style {
+	self = [super initWithStyle:style];
 	if (self) {
 		_circle = circle;
-		_style = style;
 	}
 	return self;
 }
@@ -156,6 +202,22 @@
 	return self.view;
 }
 
+#ifdef __IPHONE_7_0
+- (MKOverlayRenderer *)overlayRenderer {
+	if (self.renderer == nil) {
+		self.renderer = [[MKCircleRenderer alloc] initWithCircle:self.circle];
+		if (self.style) {
+			self.renderer.lineWidth	  = self.style.lineWidth;
+			self.renderer.strokeColor = self.style.strokeColor;
+			self.renderer.fillColor	  = self.style.fillColor;
+		}
+		else
+			NSLog(@"style == nil in %s", __FUNCTION__);
+	}
+	return self.renderer;
+}
+#endif
+
 @end
 
 // ----------------------------------------------------------------------
@@ -165,30 +227,29 @@
 @implementation MapOverlayPolygon
 
 // class method - simple polygon
-+ (MapOverlayPolygon *)polygonWithCoords:(NSArray *)values style:(MapOverlayStyle *)style {
++ (MapOverlayPolygon *)polygonWithCoords:(NSArray *)values style:(MapOverlayPathStyle *)style {
 	MapOverlayPolygon *result = [[MapOverlayPolygon alloc] initWithCoords:values style:style];
 	return result;
 }
 
-+ (MapOverlayPolygon *)polygonWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count style:(MapOverlayStyle *)style {
++ (MapOverlayPolygon *)polygonWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count style:(MapOverlayPathStyle *)style {
 	MapOverlayPolygon *result = [[MapOverlayPolygon alloc] initWithCoordinates:coords count:count style:style];
 	return result;
 }
 
 // class method - polygon with holes
-+ (MapOverlayPolygon *)polygonWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count interiorPolygons:(NSArray *)interiorPolygons style:(MapOverlayStyle *)style {
++ (MapOverlayPolygon *)polygonWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count interiorPolygons:(NSArray *)interiorPolygons style:(MapOverlayPathStyle *)style {
 	MapOverlayPolygon *result = [[MapOverlayPolygon alloc] initWithCoordinates:coords count:count interiorPolygons:interiorPolygons style:style];
 	return result;
 }
 
--  (id)initWithCoords:(NSArray *)values style:(MapOverlayStyle *)style {
-	self = [super init];
+-  (id)initWithCoords:(NSArray *)values style:(MapOverlayPathStyle *)style {
+	self = [super initWithStyle:style];
 	if (self) {
 		CLLocationCoordinate2D *coords = NULL;
 		NSUInteger count = coordsFromNSValues(&coords, values);
 		if (count) {
 			_polygon = [MKPolygon polygonWithCoordinates:coords count:count];
-			_style = style;
 			free(coords);
 		}
 	}
@@ -196,31 +257,28 @@
 }
 
 // init method - simple polygon
-- (id)initWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count style:(MapOverlayStyle *)style {
-	self = [super init];
+- (id)initWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count style:(MapOverlayPathStyle *)style {
+	self = [super initWithStyle:style];
 	if (self) {
 		_polygon = [MKPolygon polygonWithCoordinates:coords count:count];
-		_style = style;
 	}
 	return self;
 }
 
 // init method - polygon with holes
-- (id)initWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count interiorPolygons:(NSArray *)interiorPolygons style:(MapOverlayStyle *)style {
-	self = [super init];
+- (id)initWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count interiorPolygons:(NSArray *)interiorPolygons style:(MapOverlayPathStyle *)style {
+	self = [super initWithStyle:style];
 	if (self) {
 		_polygon = [MKPolygon polygonWithCoordinates:coords count:count interiorPolygons:interiorPolygons];
-		_style = style;
 	}
 	return self;
 }
 
 // init with real MKPolygon
--(id)initWithPolygon:(MKPolygon *)polygon style:(MapOverlayStyle *)style {
-	self = [super init];
+-(id)initWithPolygon:(MKPolygon *)polygon style:(MapOverlayPathStyle *)style {
+	self = [super initWithStyle:style];
 	if (self) {
 		_polygon = polygon;
-		_style = style;
 	}
 	return self;
 }
@@ -263,6 +321,22 @@
 	return self.view;
 }
 
+#ifdef __IPHONE_7_0
+- (MKOverlayRenderer *)overlayRenderer {
+	if (self.renderer == nil) {
+		self.renderer = [[MKPolygonRenderer alloc] initWithPolygon:self.polygon];
+		if (self.style) {
+			self.renderer.lineWidth	  = self.style.lineWidth;
+			self.renderer.strokeColor = self.style.strokeColor;
+			self.renderer.fillColor	  = self.style.fillColor;
+		}
+		else
+			NSLog(@"style == nil in %s", __FUNCTION__);
+	}
+	return self.renderer;
+}
+#endif
+
 @end
 
 // ----------------------------------------------------------------------
@@ -272,51 +346,48 @@
 @implementation MapOverlayPolyline
 
 // class methods
-+ (MapOverlayPolyline *)polylineWithCoords:(NSArray *)values style:(MapOverlayStyle *)style {
++ (MapOverlayPolyline *)polylineWithCoords:(NSArray *)values style:(MapOverlayPathStyle *)style {
 	MapOverlayPolyline *result = [[MapOverlayPolyline alloc] initWithCoords:values style:style];
 	return result;
 }
 
-+ (MapOverlayPolyline *)polylineWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count style:(MapOverlayStyle *)style {
++ (MapOverlayPolyline *)polylineWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count style:(MapOverlayPathStyle *)style {
 	MapOverlayPolyline *result = [[MapOverlayPolyline alloc] initWithCoordinates:coords count:count style:style];
 	return result;
 }
 
-+ (MapOverlayPolyline *)polylinePolyline:(MKPolyline *)polyline style:(MapOverlayStyle *)style {
++ (MapOverlayPolyline *)polylinePolyline:(MKPolyline *)polyline style:(MapOverlayPathStyle *)style {
 	MapOverlayPolyline *result = [[MapOverlayPolyline alloc] initWithPolyline:polyline style:style];
 	return result;
 }
 
 // init methods
--  (id)initWithCoords:(NSArray *)values style:(MapOverlayStyle *)style {
-	self = [super init];
+-  (id)initWithCoords:(NSArray *)values style:(MapOverlayPathStyle *)style {
+	self = [super initWithStyle:style];
 	if (self) {
 		CLLocationCoordinate2D *coords = NULL;
 		NSUInteger count = coordsFromNSValues(&coords, values);
 		if (count) {
 			_polyline = [MKPolyline polylineWithCoordinates:coords count:count];
-			_style = style;
 			free(coords);
 		}
 	}
 	return self;
 }
 
-- (id)initWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count style:(MapOverlayStyle *)style {
-	self = [super init];
+- (id)initWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count style:(MapOverlayPathStyle *)style {
+	self = [super initWithStyle:style];
 	if (self) {
 		_polyline = [MKPolyline polylineWithCoordinates:coords count:count];
-		_style = style;
 	}
 	return self;
 }
 
 // init with real MKPolyline
-- (id)initWithPolyline:(MKPolyline *)line style:(MapOverlayStyle *)style {
-	self = [super init];
+- (id)initWithPolyline:(MKPolyline *)line style:(MapOverlayPathStyle *)style {
+	self = [super initWithStyle:style];
 	if (self) {
 		_polyline = line;
-		_style = style;
 	}
 	return self;
 }
@@ -355,6 +426,22 @@
 	return self.view;
 }
 
+#ifdef __IPHONE_7_0
+- (MKOverlayRenderer *)overlayRenderer {
+	if (self.renderer == nil) {
+		self.renderer = [[MKPolylineRenderer alloc] initWithPolyline:self.polyline];
+		if (self.style) {
+			self.renderer.lineWidth	  = self.style.lineWidth;
+			self.renderer.strokeColor = self.style.strokeColor;
+			self.renderer.fillColor	  = self.style.fillColor;
+		}
+		else
+			NSLog(@"style == nil in %s", __FUNCTION__);
+	}
+	return self.renderer;
+}
+#endif
+
 @end
 
 // ----------------------------------------------------------------------
@@ -363,19 +450,18 @@
 
 @implementation MapOverlayRegion
 
-+ (MapOverlayRegion *)regionWithMKRegion:(MKCoordinateRegion)region style:(MapOverlayStyle *)style {
++ (MapOverlayRegion *)regionWithMKRegion:(MKCoordinateRegion)region style:(MapOverlayPathStyle *)style {
 	MapOverlayRegion *result = [[MapOverlayRegion alloc] initWithMKRegion:region style:style];
 	return result;
 }
 
-- (id)initWithMKRegion:(MKCoordinateRegion)region style:(MapOverlayStyle *)style {
-	self = [super init];
+- (id)initWithMKRegion:(MKCoordinateRegion)region style:(MapOverlayPathStyle *)style {
+	self = [super initWithStyle:style];
 	if (self) {
 //		MyLog(@"NEW <%@ %p>", NSStringFromClass([self class]), self);
 		CLLocationCoordinate2D *corners = regionCornersAsBuffer(region);
 		if (corners) {
 			_polygon = [MKPolygon polygonWithCoordinates:corners count:4];
-			_style = style;
 			free(corners);
 		}
 	}
@@ -423,6 +509,22 @@
 	}
 	return self.view;
 }
+
+#ifdef __IPHONE_7_0
+- (MKOverlayRenderer *)overlayRenderer {
+	if (self.renderer == nil) {
+		self.renderer = [[MKPolygonRenderer alloc] initWithPolygon:self.polygon];
+		if (self.style) {
+			self.renderer.lineWidth	  = self.style.lineWidth;
+			self.renderer.strokeColor = self.style.strokeColor;
+			self.renderer.fillColor	  = self.style.fillColor;
+		}
+		else
+			NSLog(@"style == nil in %s", __FUNCTION__);
+	}
+	return self.renderer;
+}
+#endif
 
 @end
 

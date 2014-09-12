@@ -39,8 +39,8 @@ static NSString *pointImage = @"cyan-16x16.png";
 
 // circle
 static NSString *circleImage = @"red-16x16.png";
-static MapOverlayStyle *circleStyle() {
-	MapOverlayStyle *result = [[MapOverlayStyle alloc] init];
+static MapOverlayPathStyle *circleStyle() {
+	MapOverlayPathStyle *result = [[MapOverlayPathStyle alloc] init];
 	result.lineWidth = 3;
 	result.strokeColor =  [UIColor redColor];
 	result.fillColor   = [[UIColor redColor] colorWithAlphaComponent:0.25];
@@ -49,8 +49,8 @@ static MapOverlayStyle *circleStyle() {
 
 // polygon
 static NSString *polygonImage = @"blue-16x16.png";
-static MapOverlayStyle *polygonStyle() {
-	MapOverlayStyle *result = [[MapOverlayStyle alloc] init];
+static MapOverlayPathStyle *polygonStyle() {
+	MapOverlayPathStyle *result = [[MapOverlayPathStyle alloc] init];
 	result.lineWidth = 4;
 	result.strokeColor =  [UIColor blueColor];
 	result.fillColor   = [[UIColor blueColor] colorWithAlphaComponent:0.25];
@@ -59,8 +59,8 @@ static MapOverlayStyle *polygonStyle() {
 
 // polyline
 static NSString *polylineImage = @"green-16x16.png";
-static MapOverlayStyle *polylineStyle() {
-	MapOverlayStyle *result = [[MapOverlayStyle alloc] init];
+static MapOverlayPathStyle *polylineStyle() {
+	MapOverlayPathStyle *result = [[MapOverlayPathStyle alloc] init];
 	result.lineWidth = 3;
 	result.strokeColor =  [UIColor greenColor];
 	result.fillColor   = [[UIColor greenColor] colorWithAlphaComponent:0.25];
@@ -69,8 +69,8 @@ static MapOverlayStyle *polylineStyle() {
 
 // region
 static NSString *regionImage = @"yellow-16x16.png";
-static MapOverlayStyle *regionStyle() {
-	MapOverlayStyle *result = [[MapOverlayStyle alloc] init];
+static MapOverlayPathStyle *regionStyle() {
+	MapOverlayPathStyle *result = [[MapOverlayPathStyle alloc] init];
 	result.lineWidth = 3;
 	result.strokeColor =  [UIColor yellowColor];
 	result.fillColor   = [[UIColor yellowColor] colorWithAlphaComponent:0.25];
@@ -572,6 +572,15 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 + (void)testMapView:(MKMapView *)mapView withRegion:(MKCoordinateRegion)region {
 	
 	if (mapView != nil && MKCoordinateRegionIsValid(region)) {
+#if 0
+		NSArray *coords2 = randomCoordsInRegion(region, 10);
+		annotationIndex = 0;
+		annotationImage = polylineImage;
+		annotationPrefix = @"polyline";
+		MyLog(@"=>	  overlays = %@", [mapView overlays]);
+		(void) [MapUtil mapView:mapView addPolylineOverlayForCoords:coords2];
+		MyLog(@"<=	  overlays = %@", [mapView overlays]);
+#else
 		MyLog(@"=> annotations = %@", [mapView annotations]);
 //		d_Annotations(mapView, @"=> annotations = ");
 		MyLog(@"=>	  overlays = %@", [mapView overlays]);
@@ -645,6 +654,7 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 		MyLog(@"<= annotations = %@", [mapView annotations]);
 //		d_Annotations(mapView, @"<= annotations = ");
 		MyLog(@"<=	  overlays = %@", [mapView overlays]);
+#endif
 	}
 }
 
@@ -668,6 +678,7 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 + (MKOverlayView *)mapView:(MKMapView *)mapView viewForOverlay:(id <MKOverlay>)overlay {
 	MKOverlayView *result = nil;
 	
+#if 0
 	// CIRCLE
 	if ([overlay isKindOfClass:[MapOverlayCircle class]]) {
 		result = [(MapOverlayCircle*)overlay overlayView];
@@ -689,6 +700,10 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 	// REGION
 	if ([overlay isKindOfClass:[MapOverlayRegion class]])
 		result = [(MapOverlayRegion*)overlay overlayView];
+#else
+	if ([overlay isKindOfClass:[MapOverlay class]])
+		result = [(MapOverlay *)overlay overlayView];
+#endif
 	else
 	
 	// STANDARD OVERLAYS & VIEWS
@@ -708,6 +723,25 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 	
 	return result;
 }
+
+// ----------------------------------------------------------------------
+
+#ifdef __IPHONE_7_0
++ (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id <MKOverlay>)overlay {
+	MKOverlayRenderer *result = nil;
+	
+#if 0	// POLYLINE
+	if ([overlay isKindOfClass:[MapOverlayPolyline class]]) {
+		result = [(MapOverlayPolyline*)overlay overlayRenderer];
+	}
+#else
+	if ([overlay isKindOfClass:[MapOverlay class]])
+		result = [(MapOverlay *)overlay overlayRenderer];
+#endif
+	
+	return result;
+}
+#endif
 
 // ----------------------------------------------------------------------
 

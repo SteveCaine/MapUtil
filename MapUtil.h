@@ -109,6 +109,10 @@ NSArray *randomCoordsInRegion(MKCoordinateRegion region, NSUInteger count);
 
 + (MKOverlayView *)mapView:(MKMapView *)mapView viewForOverlay:(id <MKOverlay>)overlay;
 
+#ifdef __IPHONE_7_0
++ (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id <MKOverlay>)overlay;
+#endif
+
 // ----------------------------------------------------------------------
 
 @end

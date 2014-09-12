@@ -19,7 +19,7 @@
 #ifdef DEBUG
 	MyLog(@"*** %@ ***", str_AppName());
 	NSDate *now = [NSDate date];
-	MyLog(@"launched at %@ on %@", str_Time(now), str_Date(now));
+	MyLog(@"launched at %@ on %@", str_logTime(now), str_logDate(now));
 	MyLog(@"%@", str_device_OS_UDID());
 	MyLog(@"\n%s", __FUNCTION__);
 	
