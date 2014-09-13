@@ -16,17 +16,18 @@
 // but visible to subclasses of these classes
 
 // ----------------------------------------------------------------------
-#pragma mark   MapAnnotationPoint
+#pragma mark   MapAnnotation
 // ----------------------------------------------------------------------
 
-@interface MapAnnotationPoint ()
+@interface MapAnnotation ()
 
-@property (copy, nonatomic, readwrite) NSString *title;
-@property (copy, nonatomic, readwrite) NSString *subtitle;
+@property (copy,   nonatomic, readwrite) NSString *title;
+@property (copy,   nonatomic, readwrite) NSString *subtitle;
+
 @property (strong, nonatomic) MKPointAnnotation *point;
 @property (strong, nonatomic) MKAnnotationView	*view;
 
-+ (MapAnnotationPoint *)pointWithCoordinate:(CLLocationCoordinate2D)coord;
++ (MapAnnotation *)pointWithCoordinate:(CLLocationCoordinate2D)coord;
 - (id)initWithCoordinate:(CLLocationCoordinate2D)coord;
 - (id)initWithPoint:(MKPointAnnotation *)point;
 
@@ -41,7 +42,7 @@
 
 @property (strong, nonatomic) MapOverlayPathStyle		*style;
 @property (strong, nonatomic) MKOverlayPathView		*view;
-#ifdef __IPHONE_7_0
+#if 0 //def __IPHONE_7_0
 @property (strong, nonatomic) MKOverlayPathRenderer	*renderer;
 #endif
 - (id)initWithStyle:(MapOverlayPathStyle *)style;
@@ -51,8 +52,8 @@
 #pragma mark - MapOverlayCircle
 // ----------------------------------------------------------------------
 
-//@interface MapOverlayCircle ()
-@interface MapOverlayCircle : MapOverlay // MKCircle //
+@interface MapOverlayCircle ()
+//@interface MapOverlayCircle : MapOverlay // MKCircle //
 
 //@property (strong, nonatomic) MapOverlayPathStyle *style;
 @property (strong, nonatomic) MKCircle		  *circle;
@@ -74,8 +75,8 @@
 #pragma mark - MapOverlayPolygon
 // ----------------------------------------------------------------------
 
-//@interface MapOverlayPolygon ()
-@interface MapOverlayPolygon : MapOverlay // MKPolygon //
+@interface MapOverlayPolygon ()
+//@interface MapOverlayPolygon : MapOverlay // MKPolygon //
 
 //@property (strong, nonatomic) MapOverlayPathStyle *style;
 @property (strong, nonatomic) MKPolygon		  *polygon;
@@ -99,8 +100,8 @@
 #pragma mark - MapOverlayPolyline
 // ----------------------------------------------------------------------
 
-//@interface MapOverlayPolyline ()
-@interface MapOverlayPolyline : MapOverlay // MKPolyline //
+@interface MapOverlayPolyline ()
+//@interface MapOverlayPolyline : MapOverlay // MKPolyline //
 
 //@property (strong, nonatomic) MapOverlayPathStyle	*style;
 @property (strong, nonatomic) MKPolyline		*polyline;
@@ -125,8 +126,8 @@
 #pragma mark - MapOverlayRegion
 // ----------------------------------------------------------------------
 
-//@interface MapOverlayRegion ()
-@interface MapOverlayRegion : MapOverlay // MKPolygon //
+@interface MapOverlayRegion ()
+//@interface MapOverlayRegion : MapOverlay // MKPolygon //
 
 //@property (strong, nonatomic) MapOverlayPathStyle *style;
 @property (strong, nonatomic) MKPolygon		  *polygon;
@@ -136,7 +137,6 @@
 								   style:(MapOverlayPathStyle *)style;
 - (id)initWithMKRegion:(MKCoordinateRegion)region
 				 style:(MapOverlayPathStyle *)style;
-
 @end
 
 // ----------------------------------------------------------------------

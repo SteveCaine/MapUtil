@@ -14,11 +14,14 @@
 
 #import "ViewController.h"
 
-#import "MapUtil.h"
-// SPC 07-09-14 just for this first demo
-// later demo will hide 'private' parts of base classes
-// and work through subclasses
-#import "MapOverlays_private.h"
+#if CONFIG_use_MapUtil
+#	import "MapUtil.h"
+#	import "MapOverlays_private.h"
+#endif
+
+#if CONFIG_use_MapDemo
+#	import "MapDemo.h"
+#endif
 
 #import "Debug_iOS.h"
 #import "Debug_MapKit.h"
@@ -75,12 +78,25 @@
 
 #pragma mark - CLLocationManagerDelegate
 
+// Deprecated in iOS 6.0
 - (void)locationManager:(CLLocationManager *)aManager
 	didUpdateToLocation:(CLLocation *)newLocation
 		   fromLocation:(CLLocation *)oldLocation {
 	// ignore updates older than one minute (may be stale, cached data)
 	if ([newLocation.timestamp timeIntervalSince1970] < [NSDate timeIntervalSinceReferenceDate] - 60)
 		return;
+	MyLog(@"%s to %@", __FUNCTION__, newLocation);
+#ifdef DEBUG
+	if (0 && oldLocation != nil) {
+		NSDate *when = (oldLocation ? oldLocation.timestamp : nil);
+		NSTimeInterval then = (when ? [when timeIntervalSinceNow] : 0);
+		NSString *str = (then ? [NSString stringWithFormat:@" (%+.2f sec)", -then] : @"");
+		CLLocationDistance moved = [newLocation distanceFromLocation:oldLocation];
+		MyLog(@"%s moved %.1f meters as of %.2f seconds ago%@", __FUNCTION__, moved, -[newLocation.timestamp timeIntervalSinceNow], str);
+	}
+#endif
+	
+	[aManager stopUpdatingLocation];
 	
 	MKCoordinateRegion viewRegion = MKCoordinateRegionMakeWithDistance(newLocation.coordinate, 2000, 2000);
 	
@@ -89,18 +105,23 @@
 	[self.mapView setRegion:adjustedRegion animated:YES];
 	
 	// PUT TEST CODE HERE
+	d_MKCoordinateRegion(adjustedRegion,	  @" adj region = ");
+	d_MKCoordinateRegion(self.mapView.region, @" map region = ");
+#if CONFIG_use_MapUtil
+	// MapUtil tests
 	[MapUtil testMapView:self.mapView withRegion:adjustedRegion];
-	
-	aManager.delegate = nil;
-	[aManager stopUpdatingLocation];
-
 	// one more annotation, this one right on top of our location
-	MapAnnotationPoint *youAreHere = [MapUtil mapView:self.mapView addAnnotationForCoordinate:newLocation.coordinate];
+	MapAnnotation *youAreHere = [MapUtil mapView:self.mapView addAnnotationForCoordinate:newLocation.coordinate];
 	youAreHere.title = @"You Are Here!";
 	youAreHere.subtitle = @"This is here ... for certain!";
 	youAreHere.image = [UIImage imageNamed:@"red-16x16.png"];
 	youAreHere.reuseID = @"YourLocationAnnotation"; // optional
 	[self performSelector:@selector(openCallout:) withObject:youAreHere afterDelay:0.5];
+#else
+	// MapDemo tests
+	[MapDemo demoInMapView:self.mapView withLocation:newLocation region:adjustedRegion];
+//	MapUserPoint *youAreHere = [MapUserPoint userWithLocation:newLocation];
+#endif
 }
 
 - (void)locationManager:(CLLocationManager *)aManager didFailWithError:(NSError *)error {
@@ -130,21 +151,59 @@
 #pragma mark - MKMapViewDelegate
 
 - (MKAnnotationView *)mapView:(MKMapView *)aMapView viewForAnnotation:(id<MKAnnotation>)annotation {
-	MKAnnotationView *result = [MapUtil mapView:self.mapView viewForAnnotation:annotation];
+	MKAnnotationView *result = nil;
+	
+//	result = [MapUtil mapView:self.mapView viewForAnnotation:annotation];
+	
+	// OUR CUSTOM ANNOTATIONS
+#if CONFIG_use_MapUtil
+	result = [MapUtil mapView:self.mapView viewForAnnotation:annotation];
+	if (result == nil)
+#else
+	if ([annotation isKindOfClass:[MapAnnotation class]])
+		result = [(MapAnnotation*)annotation annotationView];
+	else
+#endif
+	
+	// STANDARD ANNOTATIONS
+	result = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
+	
 //	MyLog(@"%s returns %@", __FUNCTION__, result);
 	return result;
 }
 
 - (MKOverlayView *)mapView:(MKMapView *)mapView viewForOverlay:(id <MKOverlay>)overlay {
-	MKOverlayView *result = [MapUtil mapView:mapView viewForOverlay:overlay];
+	MKOverlayView *result = nil;
+	
+#if CONFIG_use_MapUtil
+	result = [MapUtil mapView:mapView viewForOverlay:overlay]; // handles standard overlays
+#else
+	// OUR CUSTOM OVERLAYS
+	if ([overlay isKindOfClass:[MapOverlay class]])
+		result = [(MapOverlay *)overlay overlayView];
+	
+	// STANDARD OVERLAYS
+	else if ([overlay isKindOfClass:[MKCircle class]]) {
+		result = [[MKCircleView alloc] initWithOverlay:overlay];
+	}
+	else if ([overlay isKindOfClass:[MKPolygon class]]) {
+		result = [[MKPolygonView alloc] initWithOverlay:overlay];
+	}
+	else if ([overlay isKindOfClass:[MKPolyline class]]) {
+		result = [[MKPolylineView alloc] initWithOverlay:overlay];
+	}
+#endif
 //	MyLog(@"%s returns %@", __FUNCTION__, result);
 	return result;
 }
 
-#ifdef __IPHONE_7_0
-- (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id < MKOverlay >)overlay {
+#if 0 //def __IPHONE_7_0
+- (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id <MKOverlay>)overlay {
 	MKOverlayRenderer *result = nil;
+#if CONFIG_use_MapUtil
 	result = [MapUtil mapView:mapView rendererForOverlay:overlay];
+#else
+#endif
 	return result;
 }
 #endif

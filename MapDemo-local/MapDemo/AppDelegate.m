@@ -23,6 +23,8 @@
 	MyLog(@"%@", str_device_OS_UDID());
 	MyLog(@"\n%s", __FUNCTION__);
 	
+	MyLog(@"OVERLAY RENDERERS ARE DISABLED!!!");
+	
 	if(getenv( "NSDebugEnabled"))
 		MyLog(@"NSDebugEnabled == YES");
 	if(getenv( "NSZombieEnabled"))

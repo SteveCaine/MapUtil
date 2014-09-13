@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8E20EDA119C3529D009F24DF /* MapDemo.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E20EDA019C3529D009F24DF /* MapDemo.m */; };
+		8E24CB8319C3A4FD00C98C5F /* UserDot.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E24CB8219C3A4FD00C98C5F /* UserDot.png */; };
+		8E24CB8619C3C56C00C98C5F /* RegionDot.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E24CB8419C3C56C00C98C5F /* RegionDot.png */; };
+		8E24CB8719C3C56C00C98C5F /* VicinityDot.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E24CB8519C3C56C00C98C5F /* VicinityDot.png */; };
+		8E24CB8919C3C75000C98C5F /* TrailDot.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E24CB8819C3C75000C98C5F /* TrailDot.png */; };
 		8E4256A01975938700906920 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E42569F1975938700906920 /* CoreLocation.framework */; };
 		8E4256A21975939100906920 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E4256A11975939100906920 /* MapKit.framework */; };
 		8E4256AD19759C8C00906920 /* Debug_iOS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8E4256AA19759C8C00906920 /* Debug_iOS.cpp */; };
@@ -50,6 +55,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8E20ED9F19C3529D009F24DF /* MapDemo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapDemo.h; sourceTree = "<group>"; };
+		8E20EDA019C3529D009F24DF /* MapDemo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MapDemo.m; sourceTree = "<group>"; };
+		8E24CB8219C3A4FD00C98C5F /* UserDot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = UserDot.png; sourceTree = "<group>"; };
+		8E24CB8419C3C56C00C98C5F /* RegionDot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = RegionDot.png; sourceTree = "<group>"; };
+		8E24CB8519C3C56C00C98C5F /* VicinityDot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = VicinityDot.png; sourceTree = "<group>"; };
+		8E24CB8819C3C75000C98C5F /* TrailDot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TrailDot.png; sourceTree = "<group>"; };
 		8E42569F1975938700906920 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		8E4256A11975939100906920 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		8E4256AA19759C8C00906920 /* Debug_iOS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Debug_iOS.cpp; sourceTree = "<group>"; };
@@ -191,6 +202,8 @@
 		8E4CBE3F19758D7C00C4A870 /* MapDemo */ = {
 			isa = PBXGroup;
 			children = (
+				8E20ED9F19C3529D009F24DF /* MapDemo.h */,
+				8E20EDA019C3529D009F24DF /* MapDemo.m */,
 				8E4CBE4819758D7C00C4A870 /* AppDelegate.h */,
 				8E4CBE4919758D7C00C4A870 /* AppDelegate.m */,
 				8E4CBE4B19758D7C00C4A870 /* Main.storyboard */,
@@ -245,6 +258,10 @@
 		8EE547631975A3AA003602E1 /* images */ = {
 			isa = PBXGroup;
 			children = (
+				8E24CB8219C3A4FD00C98C5F /* UserDot.png */,
+				8E24CB8519C3C56C00C98C5F /* VicinityDot.png */,
+				8E24CB8819C3C75000C98C5F /* TrailDot.png */,
+				8E24CB8419C3C56C00C98C5F /* RegionDot.png */,
 				8EE547661975A3AA003602E1 /* red-16x16.png */,
 				8EE547651975A3AA003602E1 /* green-16x16.png */,
 				8EE547641975A3AA003602E1 /* blue-16x16.png */,
@@ -301,7 +318,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0510;
-				ORGANIZATIONNAME = SteveCaine;
+				ORGANIZATIONNAME = "Steve Caine";
 				TargetAttributes = {
 					8E4CBE5619758D7C00C4A870 = {
 						TestTargetID = 8E4CBE3519758D7C00C4A870;
@@ -334,14 +351,18 @@
 			files = (
 				8EE5476B1975A3AA003602E1 /* yellow-16x16.png in Resources */,
 				8EE547611975A39F003602E1 /* Harvard Square.gpx in Resources */,
+				8E24CB8919C3C75000C98C5F /* TrailDot.png in Resources */,
 				8EE5476E1975A664003602E1 /* cyan-16x16.png in Resources */,
 				8E4CBE5219758D7C00C4A870 /* Images.xcassets in Resources */,
 				8EE5476F1975A664003602E1 /* magenta-16x16.png in Resources */,
 				8E4CBE4419758D7C00C4A870 /* InfoPlist.strings in Resources */,
 				8EE547621975A39F003602E1 /* White House.gpx in Resources */,
+				8E24CB8719C3C56C00C98C5F /* VicinityDot.png in Resources */,
 				8E4256B519759D7500906920 /* README.md in Resources */,
 				8E4CBE4D19758D7C00C4A870 /* Main.storyboard in Resources */,
 				8EE547691975A3AA003602E1 /* green-16x16.png in Resources */,
+				8E24CB8319C3A4FD00C98C5F /* UserDot.png in Resources */,
+				8E24CB8619C3C56C00C98C5F /* RegionDot.png in Resources */,
 				8EE547681975A3AA003602E1 /* blue-16x16.png in Resources */,
 				8EE5476A1975A3AA003602E1 /* red-16x16.png in Resources */,
 			);
@@ -363,6 +384,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8E4256BB19759F5D00906920 /* MapUtil.m in Sources */,
+				8E20EDA119C3529D009F24DF /* MapDemo.m in Sources */,
 				8E4256AE19759C8C00906920 /* Debug_iOS.m in Sources */,
 				8E4256B219759D0500906920 /* MapOverlays.m in Sources */,
 				8E4CBE5019758D7C00C4A870 /* ViewController.m in Sources */,

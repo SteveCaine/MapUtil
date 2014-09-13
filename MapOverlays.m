@@ -28,6 +28,36 @@
 
 @implementation MapOverlayPathStyle
 
++ (MapOverlayPathStyle *)styleWithLineWidth:(CGFloat)width
+								strokeColor:(UIColor *)stroke
+								  fillColor:(UIColor *)fill {
+	MapOverlayPathStyle *result = [[MapOverlayPathStyle alloc] init];
+	result.lineWidth   = width;
+	result.strokeColor = stroke;
+	result.fillColor   = fill;
+	return result;
+}
+
++ (MapOverlayPathStyle *)styleWithLineWidth:(CGFloat)width
+									  color:(UIColor *)color
+									  alpha:(CGFloat)alpha {
+	MapOverlayPathStyle *result = [[MapOverlayPathStyle alloc] init];
+	result.lineWidth   = width;
+	result.strokeColor = color;
+	result.fillColor   = [color colorWithAlphaComponent:alpha];
+	return result;
+}
+
+// for polylines with solid fill
++ (MapOverlayPathStyle *)styleWithLineWidth:(CGFloat)width
+									  color:(UIColor *)color {
+	MapOverlayPathStyle *result = [[MapOverlayPathStyle alloc] init];
+	result.lineWidth   = width;
+	result.strokeColor = color;
+	result.fillColor   = color;
+	return result;
+}
+
 + (MapOverlayPathStyle *)randomStyle {
 	MapOverlayPathStyle *result = [[MapOverlayPathStyle alloc] init];
 	
@@ -49,16 +79,17 @@
 @end
 
 // ----------------------------------------------------------------------
-#pragma mark - MapAnnotationPoint
+#pragma mark - MapAnnotation
 // ----------------------------------------------------------------------
 
-@implementation MapAnnotationPoint
-+ (MapAnnotationPoint *)pointWithCoordinate:(CLLocationCoordinate2D)coord {
-	MapAnnotationPoint *result = [[MapAnnotationPoint alloc] initWithCoordinate:coord];
+@implementation MapAnnotation
++ (MapAnnotation *)pointWithCoordinate:(CLLocationCoordinate2D)coord {
+	MapAnnotation *result = [[MapAnnotation alloc] initWithCoordinate:coord];
 	return result;
 }
 
 - (id)initWithCoordinate:(CLLocationCoordinate2D)coord {
+	MyLog(@"%s { %f, %f } (lat/lon)", __FUNCTION__, coord.latitude, coord.longitude);
 	self = [super init];
 	if (self) {
 		_point = [[MKPointAnnotation alloc] init];
@@ -137,7 +168,7 @@
 #endif
 	return result;
 }
-#ifdef __IPHONE_7_0
+#if 0 //def __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer {
 	MKOverlayRenderer *result = nil;
 #ifdef DEBUG
@@ -161,7 +192,8 @@
 }
 
 - (id)initWithCenterCoordinate:(CLLocationCoordinate2D)center radius:(CLLocationDistance)radius style:(MapOverlayPathStyle *)style {
-	self = [super init];
+	self = [super initWithStyle:style];
+	MyLog(@"%s { %f, %f }, %f (lat/lon,radius)", __FUNCTION__, center.latitude, center.longitude, radius);
 	if (self) {
 		_circle = [MKCircle circleWithCenterCoordinate:center radius:radius];
 	}
@@ -202,7 +234,7 @@
 	return self.view;
 }
 
-#ifdef __IPHONE_7_0
+#if 0 //def __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer {
 	if (self.renderer == nil) {
 		self.renderer = [[MKCircleRenderer alloc] initWithCircle:self.circle];
@@ -244,6 +276,7 @@
 }
 
 -  (id)initWithCoords:(NSArray *)values style:(MapOverlayPathStyle *)style {
+	MyLog(@"%s with %i coords (NSArray)", __FUNCTION__, [values count]);
 	self = [super initWithStyle:style];
 	if (self) {
 		CLLocationCoordinate2D *coords = NULL;
@@ -258,6 +291,7 @@
 
 // init method - simple polygon
 - (id)initWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count style:(MapOverlayPathStyle *)style {
+	MyLog(@"%s with %i coords (buffer)", __FUNCTION__, count);
 	self = [super initWithStyle:style];
 	if (self) {
 		_polygon = [MKPolygon polygonWithCoordinates:coords count:count];
@@ -267,6 +301,7 @@
 
 // init method - polygon with holes
 - (id)initWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count interiorPolygons:(NSArray *)interiorPolygons style:(MapOverlayPathStyle *)style {
+	MyLog(@"%s with %i coords (buffer) and %i holes", __FUNCTION__, count, [interiorPolygons count]);
 	self = [super initWithStyle:style];
 	if (self) {
 		_polygon = [MKPolygon polygonWithCoordinates:coords count:count interiorPolygons:interiorPolygons];
@@ -321,7 +356,7 @@
 	return self.view;
 }
 
-#ifdef __IPHONE_7_0
+#if 0 //def __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer {
 	if (self.renderer == nil) {
 		self.renderer = [[MKPolygonRenderer alloc] initWithPolygon:self.polygon];
@@ -363,6 +398,7 @@
 
 // init methods
 -  (id)initWithCoords:(NSArray *)values style:(MapOverlayPathStyle *)style {
+	MyLog(@"%s with %i coords (NSArray)", __FUNCTION__, [values count]);
 	self = [super initWithStyle:style];
 	if (self) {
 		CLLocationCoordinate2D *coords = NULL;
@@ -376,6 +412,7 @@
 }
 
 - (id)initWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count style:(MapOverlayPathStyle *)style {
+	MyLog(@"%s with %i coords (buffer)", __FUNCTION__, count);
 	self = [super initWithStyle:style];
 	if (self) {
 		_polyline = [MKPolyline polylineWithCoordinates:coords count:count];
@@ -426,7 +463,7 @@
 	return self.view;
 }
 
-#ifdef __IPHONE_7_0
+#if 0 //def __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer {
 	if (self.renderer == nil) {
 		self.renderer = [[MKPolylineRenderer alloc] initWithPolyline:self.polyline];
@@ -456,14 +493,12 @@
 }
 
 - (id)initWithMKRegion:(MKCoordinateRegion)region style:(MapOverlayPathStyle *)style {
-	self = [super initWithStyle:style];
+	MyLog(@"%s with %@", __FUNCTION__, str_MKCoordinateRegion(region));
+	CLLocationCoordinate2D *corners = regionCornersAsBuffer(region);
+	self = [super initWithCoordinates:corners count:4 interiorPolygons:nil style:style];
+	free(corners);
 	if (self) {
 //		MyLog(@"NEW <%@ %p>", NSStringFromClass([self class]), self);
-		CLLocationCoordinate2D *corners = regionCornersAsBuffer(region);
-		if (corners) {
-			_polygon = [MKPolygon polygonWithCoordinates:corners count:4];
-			free(corners);
-		}
 	}
 	return self;
 }
@@ -510,7 +545,7 @@
 	return self.view;
 }
 
-#ifdef __IPHONE_7_0
+#if 0 //def __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer {
 	if (self.renderer == nil) {
 		self.renderer = [[MKPolygonRenderer alloc] initWithPolygon:self.polygon];

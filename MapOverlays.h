@@ -7,7 +7,7 @@
 //
 //	subclasses will hide most of these details
 //
-//	for MapAnnotationPoint,
+//	for MapAnnotation,
 //		@property title, subtitle, coordinate
 //	are declared in MKAnnotation
 //
@@ -46,18 +46,31 @@
 @property (strong, nonatomic) UIColor *strokeColor;
 @property (strong, nonatomic) UIColor *fillColor;
 
++ (MapOverlayPathStyle *)styleWithLineWidth:(CGFloat)width
+								strokeColor:(UIColor *)stroke
+								  fillColor:(UIColor *)fill;
+
++ (MapOverlayPathStyle *)styleWithLineWidth:(CGFloat)width
+									  color:(UIColor *)color
+									  alpha:(CGFloat)alpha;
+// for polylines with solid fill
++ (MapOverlayPathStyle *)styleWithLineWidth:(CGFloat)width
+									  color:(UIColor *)color;
+
 + (MapOverlayPathStyle *)randomStyle;
 
 @end
 
 // ----------------------------------------------------------------------
-#pragma mark - MapAnnotationPoint
+#pragma mark - MapAnnotation
 // ----------------------------------------------------------------------
 
-@interface MapAnnotationPoint : NSObject <MKAnnotation> // MKPointAnnotation //
+@interface MapAnnotation : NSObject <MKAnnotation> // MKPointAnnotation //
 
-@property (copy,   nonatomic) NSString *reuseID; // can be left nil
-@property (strong, nonatomic) UIImage  *image;	 // ditto
+//@property (copy,   nonatomic, readwrite) NSString *title;
+//@property (copy,   nonatomic, readwrite) NSString *subtitle;
+@property (copy,   nonatomic		   ) NSString *reuseID;	// can be left nil
+@property (strong, nonatomic           ) UIImage  *image;	// ditto
 
 - (MKAnnotationView *)annotationView;
 
@@ -70,13 +83,14 @@
 @interface MapOverlay : NSObject <MKOverlay>
 
 - (MKOverlayView *)overlayView;
-#ifdef __IPHONE_7_0
+
+#if 0 //def __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer;
 #endif
 
 @end
 
-#if 0
+#if 1
 // ----------------------------------------------------------------------
 #pragma mark - MapOverlayCircle
 // ----------------------------------------------------------------------
@@ -106,17 +120,21 @@
 //- (MKOverlayPathView *)overlayView;
 
 @end
+#endif
 
 // ----------------------------------------------------------------------
-#pragma mark - MapOverlayRegion
+#pragma mark - MapOverlayRegion - polygon framing an MKRegion - for demo
 // ----------------------------------------------------------------------
 
-@interface MapOverlayRegion : MapOverlay // MKPolygon //
+@interface MapOverlayRegion : MapOverlayPolygon
 
-//- (MKOverlayPathView *)overlayView;
++ (MapOverlayRegion *)regionWithMKRegion:(MKCoordinateRegion)region
+								   style:(MapOverlayPathStyle *)style;
+
+//- (id)initWithMKRegion:(MKCoordinateRegion)region
+//				 style:(MapOverlayPathStyle *)style;
 
 @end
-#endif
 
 // ----------------------------------------------------------------------
 #pragma mark - MapOverlays

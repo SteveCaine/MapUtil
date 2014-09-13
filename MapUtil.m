@@ -386,16 +386,16 @@ NSArray *randomCoordsInRegion(MKCoordinateRegion region, NSUInteger count) {
 
 @implementation MapUtil
 
-+ (MapAnnotationPoint *)mapView:(MKMapView *)mapView
++ (MapAnnotation *)mapView:(MKMapView *)mapView
 	 addAnnotationForCoordinate:(CLLocationCoordinate2D)coord {
-	MapAnnotationPoint *result = nil;
+	MapAnnotation *result = nil;
 	
 	if (mapView != nil && CLLocationCoordinate2DIsValid(coord)) {
 		NSString *imageFile = annotationImage;
 		if (imageFile == nil)
 			imageFile = pointImage;
 		
-		result = [MapAnnotationPoint pointWithCoordinate:coord];
+		result = [MapAnnotation pointWithCoordinate:coord];
 		if (annotationIndex == 0)
 			result.title = [NSString stringWithFormat:@"%@ point #%i", annotationPrefix, annotationIndex];
 		else
@@ -426,7 +426,7 @@ addAnnotationsForCoords:(NSArray *)values {
 		for (NSValue *value in values) {
 			CLLocationCoordinate2D coord = [value MKCoordinateValue];
 			
-			MapAnnotationPoint *point = [MapAnnotationPoint pointWithCoordinate:coord];
+			MapAnnotation *point = [MapAnnotation pointWithCoordinate:coord];
 			if (i == 0)
 				point.title = [NSString stringWithFormat:@"%@ point #%i", annotationPrefix, i];
 			else
@@ -457,7 +457,7 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 			for (int index = 0; index < count; ++index) {
 				CLLocationCoordinate2D coord = coords[index];
 				
-				MapAnnotationPoint *point = [MapAnnotationPoint pointWithCoordinate:coord];
+				MapAnnotation *point = [MapAnnotation pointWithCoordinate:coord];
 				point.title = [NSString stringWithFormat:@"%@ point #%i", annotationPrefix, index];
 				if (index)
 					point.subtitle = @"You be here too, mon ...";
@@ -550,7 +550,7 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 	return result;
 }
 
-+ (MapOverlayRegion *)mapView:(MKMapView *)mapView addRegionOverlayForRegion:(MKCoordinateRegion)region
++ (MapOverlayRegion *)mapView:(MKMapView *)mapView addPolygonOverlayForRegion:(MKCoordinateRegion)region
 					   scaled:(CGFloat)scale {
 	MapOverlayRegion *result = nil;
 	
@@ -581,9 +581,9 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 		(void) [MapUtil mapView:mapView addPolylineOverlayForCoords:coords2];
 		MyLog(@"<=	  overlays = %@", [mapView overlays]);
 #else
-		MyLog(@"=> annotations = %@", [mapView annotations]);
+//		MyLog(@"=> annotations = %@", [mapView annotations]);
 //		d_Annotations(mapView, @"=> annotations = ");
-		MyLog(@"=>	  overlays = %@", [mapView overlays]);
+//		MyLog(@"=>	  overlays = %@", [mapView overlays]);
 		
 		// some random points for our poly overlays
 		NSArray *coords1 = randomCoordsInRegion(region, 10);
@@ -648,12 +648,16 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 		annotationPrefix = @"region";
 		
 		// region
-		(void) [MapUtil mapView:mapView addAnnotationsInRegion:region count:5];
-		(void) [MapUtil mapView:mapView addRegionOverlayForRegion:region scaled:0.75];
+//		(void) [MapUtil mapView:mapView addAnnotationsInRegion:region count:5];
+		MKCoordinateRegion region_75 = scaledRegion(region, 0.75);
+		NSArray *values = regionCornersAsNSValues(region_75);
+		[MapUtil mapView:mapView addAnnotationsForCoords:values];
+
+		(void) [MapUtil mapView:mapView addPolygonOverlayForRegion:region scaled:0.75];
 		
-		MyLog(@"<= annotations = %@", [mapView annotations]);
+//		MyLog(@"<= annotations = %@", [mapView annotations]);
 //		d_Annotations(mapView, @"<= annotations = ");
-		MyLog(@"<=	  overlays = %@", [mapView overlays]);
+//		MyLog(@"<=	  overlays = %@", [mapView overlays]);
 #endif
 	}
 }
@@ -666,8 +670,8 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 	MKAnnotationView *result = nil;
 	
 	// POINT
-	if ([annotation isKindOfClass:[MapAnnotationPoint class]])
-		result = [(MapAnnotationPoint*)annotation annotationView];
+	if ([annotation isKindOfClass:[MapAnnotation class]])
+		result = [(MapAnnotation*)annotation annotationView];
 	else
 		// all other annotation classes
 		result = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
@@ -726,7 +730,7 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 
 // ----------------------------------------------------------------------
 
-#ifdef __IPHONE_7_0
+#if 0 //def __IPHONE_7_0
 + (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id <MKOverlay>)overlay {
 	MKOverlayRenderer *result = nil;
 	

@@ -74,15 +74,15 @@ NSArray *randomCoordsInRegion(MKCoordinateRegion region, NSUInteger count);
 #pragma mark - MapUtil
 // ----------------------------------------------------------------------
 
-@class MapAnnotationPoint;
+@class MapAnnotation;
 @class MapOverlayCircle;
 @class MapOverlayPolygon;
 @class MapOverlayPolyline;
-@class MapOverlayRegion;
+@class MapRegionOverlay;
 
 @interface MapUtil : NSObject
 
-+ (MapAnnotationPoint *)mapView:(MKMapView *)mapView addAnnotationForCoordinate:(CLLocationCoordinate2D)coord;
++ (MapAnnotation *)mapView:(MKMapView *)mapView addAnnotationForCoordinate:(CLLocationCoordinate2D)coord;
 
 + (NSArray *)mapView:(MKMapView *)mapView addAnnotationsForCoords:(NSArray *)values;
 
@@ -95,7 +95,7 @@ NSArray *randomCoordsInRegion(MKCoordinateRegion region, NSUInteger count);
 
 + (MapOverlayPolyline *)mapView:(MKMapView *)mapView addPolylineOverlayForCoords:(NSArray *)values;
 
-+ (MapOverlayRegion *)mapView:(MKMapView *)mapView addRegionOverlayForRegion:(MKCoordinateRegion)region
++ (MapRegionOverlay *)mapView:(MKMapView *)mapView addPolygonOverlayForRegion:(MKCoordinateRegion)region
 					   scaled:(CGFloat)scale;
 
 // ----------------------------------------------------------------------
@@ -109,7 +109,7 @@ NSArray *randomCoordsInRegion(MKCoordinateRegion region, NSUInteger count);
 
 + (MKOverlayView *)mapView:(MKMapView *)mapView viewForOverlay:(id <MKOverlay>)overlay;
 
-#ifdef __IPHONE_7_0
+#if 0 //def __IPHONE_7_0
 + (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id <MKOverlay>)overlay;
 #endif
 
