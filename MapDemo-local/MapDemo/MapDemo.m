@@ -27,6 +27,7 @@ static MapOverlayPathStyle *vicinityStyle() { // circle
 	return result;
 }
 
+// TODO: still need to implement MapUserTrail overlay class
 //static MapOverlayPathStyle *trailStyle() { // polyline
 //	MapOverlayPathStyle *result = [MapOverlayPathStyle styleWithLineWidth:2.0 color:[UIColor blueColor]];
 //	return result;
@@ -94,6 +95,8 @@ static MapOverlayPathStyle *regionStyle() { // polygon
 @implementation MapUserTrail
 
 + (MapUserTrail *)trailWithLocationManager:(CLLocationManager *)manager {
+	// TODO: finish implementing this class to track user's changing location
+	// via CLLocationManagerDelegate callbacks
 	MapUserTrail *result = nil; //[[MapUserTrail alloc] initWithLocationManager:manager];
 	return result;
 }
@@ -101,17 +104,10 @@ static MapOverlayPathStyle *regionStyle() { // polygon
 #pragma mark - CLLocationManagerDelegate
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
-	
 	if (self.locations == nil)
 		self.locations = [NSMutableArray arrayWithCapacity:[locations count]];
-	
-	else if ([locations count] == 1) {
-		CLLocationCoordinate2D coord = [[locations firstObject] MKCoordinateValue];
-		if (fabs(coord.latitude) < 0.1 && fabs(coord.longitude) < 0.1)
-			[self.locations removeAllObjects];
-	}
 	[self.locations addObjectsFromArray:locations];
-	// and then ...?
+	// TODO: and then ...?
 }
 
 @end
@@ -151,11 +147,6 @@ static MapOverlayPathStyle *regionStyle() { // polygon
 		MyLog(@"=>	  overlays = %@", [mapView overlays]);
 		
 		MapUserPoint *user = [MapUserPoint userWithLocation:location];
-//		user.title = [[UIDevice currentDevice] model];
-//		user.subtitle = [NSString stringWithFormat:@"{ %f, %f } (lat/lon)",
-//						 location.coordinate.latitude, location.coordinate.longitude];
-//		user.reuseID = @"UserPoint";
-//		user.image = [UIImage imageNamed:userImage];
 		[mapView addAnnotation:user];
 		
 		MapUserVicinity *vicinity = [MapUserVicinity vicinityWithLocation:location];
@@ -163,14 +154,15 @@ static MapOverlayPathStyle *regionStyle() { // polygon
 		
 		//MapUserTrail *TK*
 		
-//		MKCoordinateRegion region = mapView.region;
-		MKCoordinateRegion r1 = scaledRegion(region, 0.50);
-		MapRegionOverlay *o1 = [[MapRegionOverlay alloc] initWithMKRegion:r1 style:regionStyle()];
+		MKCoordinateRegion region_50 = scaledRegion(region, 0.50);
+		MapRegionOverlay *o1 = [[MapRegionOverlay alloc] initWithMKRegion:region_50 style:regionStyle()];
 		[mapView addOverlay:o1];
 		
+		// annotate the corners of our (shrunken) region
 		NSUInteger index = 0;
 		NSString *titles[] = {@"NW",@"NE",@"SE",@"SW"};
-		NSArray *corners = regionCornersAsNSValues(r1);
+		
+		NSArray *corners = regionCornersAsNSValues(region_50);
 		for (NSValue *corner in corners) {
 			CLLocationCoordinate2D coord = [corner MKCoordinateValue];
 			MapAnnotation *pt = [MapAnnotation pointWithCoordinate:coord];
@@ -180,6 +172,7 @@ static MapOverlayPathStyle *regionStyle() { // polygon
 			pt.image = [UIImage imageNamed:regionImage];
 			[mapView addAnnotation:pt];
 		}
+		
 		MyLog(@"<= annotations = %@", [mapView annotations]);
 		MyLog(@"<=	  overlays = %@", [mapView overlays]);
 	}

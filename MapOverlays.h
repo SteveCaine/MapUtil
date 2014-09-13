@@ -65,62 +65,49 @@
 #pragma mark - MapAnnotation
 // ----------------------------------------------------------------------
 
-@interface MapAnnotation : NSObject <MKAnnotation> // MKPointAnnotation //
+@interface MapAnnotation : NSObject <MKAnnotation>
 
-//@property (copy,   nonatomic, readwrite) NSString *title;
-//@property (copy,   nonatomic, readwrite) NSString *subtitle;
-@property (copy,   nonatomic		   ) NSString *reuseID;	// can be left nil
-@property (strong, nonatomic           ) UIImage  *image;	// ditto
+@property (copy,   nonatomic) NSString *reuseID; // can be left nil
+@property (strong, nonatomic) UIImage  *image;	 // ditto
 
 - (MKAnnotationView *)annotationView;
 
 @end
 
 // ----------------------------------------------------------------------
-#pragma mark - MapOverlay
+#pragma mark - MapOverlay - abstract base class
 // ----------------------------------------------------------------------
 
 @interface MapOverlay : NSObject <MKOverlay>
 
 - (MKOverlayView *)overlayView;
 
-#if 0 //def __IPHONE_7_0
+#ifdef __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer;
 #endif
 
 @end
 
-#if 1
 // ----------------------------------------------------------------------
 #pragma mark - MapOverlayCircle
 // ----------------------------------------------------------------------
 
-@interface MapOverlayCircle : MapOverlay // MKCircle //
-
-//- (MKOverlayPathView *)overlayView;
-
+@interface MapOverlayCircle : MapOverlay
 @end
 
 // ----------------------------------------------------------------------
 #pragma mark - MapOverlayPolygon
 // ----------------------------------------------------------------------
 
-@interface MapOverlayPolygon : MapOverlay // MKPolygon //
-
-//- (MKOverlayPathView *)overlayView;
-
+@interface MapOverlayPolygon : MapOverlay
 @end
 
 // ----------------------------------------------------------------------
 #pragma mark - MapOverlayPolyline
 // ----------------------------------------------------------------------
 
-@interface MapOverlayPolyline : MapOverlay // MKPolyline //
-
-//- (MKOverlayPathView *)overlayView;
-
+@interface MapOverlayPolyline : MapOverlay
 @end
-#endif
 
 // ----------------------------------------------------------------------
 #pragma mark - MapOverlayRegion - polygon framing an MKRegion - for demo
@@ -137,7 +124,7 @@
 @end
 
 // ----------------------------------------------------------------------
-#pragma mark - MapOverlays
+#pragma mark - MapOverlays - demo code
 // ----------------------------------------------------------------------
 
 @interface MapOverlays : NSObject

@@ -2,6 +2,10 @@
 //	MapUtil.h
 //	MapUtil
 //
+//	utility code and demo code for working with CLLocation and MapKit
+//	including use of my map annotation and overlay classes
+//	in files "MapOverlays.[h/m]" and "MapOverlays_private.h"
+//
 //	Created by Steve Caine on 05/21/14.
 //
 //	This code is distributed under the terms of the MIT license.
@@ -101,17 +105,6 @@ NSArray *randomCoordsInRegion(MKCoordinateRegion region, NSUInteger count);
 // ----------------------------------------------------------------------
 
 + (void)testMapView:(MKMapView *)mapView withRegion:(MKCoordinateRegion)region;
-
-// ----------------------------------------------------------------------
-// MKMapViewDelegate methods
-
-+ (MKAnnotationView *)mapView:(MKMapView *)aMapView viewForAnnotation:(id<MKAnnotation>)annotation;
-
-+ (MKOverlayView *)mapView:(MKMapView *)mapView viewForOverlay:(id <MKOverlay>)overlay;
-
-#if 0 //def __IPHONE_7_0
-+ (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id <MKOverlay>)overlay;
-#endif
 
 // ----------------------------------------------------------------------
 

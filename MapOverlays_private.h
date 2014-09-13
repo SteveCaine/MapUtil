@@ -2,6 +2,18 @@
 //	MapOverlays_private.h
 //	MapUtil
 //
+//	here we put those parts of the MapOverlay classes' interfaces
+//	that should be hidden from general use but visible to subclasses
+//
+//	polygon and polyline overlays can get their coordinates
+//	as either an NSArray of NSValues
+//	or a C-style buffer created with malloc()
+//	(on which they call free())
+//
+//	it would be possible (but less useful)
+//	to write code that creates polygon and polyline overlays
+//	from collections of MKMapPoints
+//
 //	Created by Steve Caine on 05/29/14.
 //
 //	This code is distributed under the terms of the MIT license.
@@ -10,10 +22,6 @@
 //
 
 #import "MapOverlays.h"
-
-// here we put those parts of the MapOverlays classes' interfaces
-// that should be hidden from general use
-// but visible to subclasses of these classes
 
 // ----------------------------------------------------------------------
 #pragma mark   MapAnnotation
@@ -28,7 +36,9 @@
 @property (strong, nonatomic) MKAnnotationView	*view;
 
 + (MapAnnotation *)pointWithCoordinate:(CLLocationCoordinate2D)coord;
+
 - (id)initWithCoordinate:(CLLocationCoordinate2D)coord;
+
 - (id)initWithPoint:(MKPointAnnotation *)point;
 
 @end
@@ -40,12 +50,14 @@
 
 @interface MapOverlay ()
 
-@property (strong, nonatomic) MapOverlayPathStyle		*style;
+@property (strong, nonatomic) MapOverlayPathStyle	*style;
 @property (strong, nonatomic) MKOverlayPathView		*view;
-#if 0 //def __IPHONE_7_0
+#ifdef __IPHONE_7_0
 @property (strong, nonatomic) MKOverlayPathRenderer	*renderer;
 #endif
+
 - (id)initWithStyle:(MapOverlayPathStyle *)style;
+
 @end
 
 // ----------------------------------------------------------------------
@@ -53,18 +65,17 @@
 // ----------------------------------------------------------------------
 
 @interface MapOverlayCircle ()
-//@interface MapOverlayCircle : MapOverlay // MKCircle //
 
-//@property (strong, nonatomic) MapOverlayPathStyle *style;
-@property (strong, nonatomic) MKCircle		  *circle;
-//@property (strong, nonatomic) MKCircleView	  *view;
+@property (strong, nonatomic) MKCircle *circle;
 
 + (MapOverlayCircle *)circleWithCenterCoordinate:(CLLocationCoordinate2D)center
 										  radius:(CLLocationDistance)radius
 										   style:(MapOverlayPathStyle *)style;
+
 - (id)initWithCenterCoordinate:(CLLocationCoordinate2D)center
 						radius:(CLLocationDistance)radius
 						 style:(MapOverlayPathStyle *)style;
+
 - (id)initWithCircle:(MKCircle *)circle
 			   style:(MapOverlayPathStyle *)style;
 
@@ -76,20 +87,20 @@
 // ----------------------------------------------------------------------
 
 @interface MapOverlayPolygon ()
-//@interface MapOverlayPolygon : MapOverlay // MKPolygon //
 
-//@property (strong, nonatomic) MapOverlayPathStyle *style;
-@property (strong, nonatomic) MKPolygon		  *polygon;
-//@property (strong, nonatomic) MKPolygonView	  *view;
+@property (strong, nonatomic) MKPolygon *polygon;
 
 + (MapOverlayPolygon *)polygonWithCoords:(NSArray *)values
 								   style:(MapOverlayPathStyle *)style;
+
 + (MapOverlayPolygon *)polygonWithCoordinates:(CLLocationCoordinate2D *)coords
 										count:(NSUInteger)count
 										style:(MapOverlayPathStyle *)style;
+
 - (id)initWithCoordinates:(CLLocationCoordinate2D *)coords
 					count:(NSUInteger)count
 					style:(MapOverlayPathStyle *)style;
+
 - (id)initWithPolygon:(MKPolygon *)polygon
 				style:(MapOverlayPathStyle *)style;
 
@@ -101,22 +112,23 @@
 // ----------------------------------------------------------------------
 
 @interface MapOverlayPolyline ()
-//@interface MapOverlayPolyline : MapOverlay // MKPolyline //
 
-//@property (strong, nonatomic) MapOverlayPathStyle	*style;
-@property (strong, nonatomic) MKPolyline		*polyline;
-//@property (strong, nonatomic) MKPolylineView	*view;
+@property (strong, nonatomic) MKPolyline *polyline;
 
 + (MapOverlayPolyline *)polylineWithCoords:(NSArray *)values
 									 style:(MapOverlayPathStyle *)style;
+
 + (MapOverlayPolyline *)polylineWithCoordinates:(CLLocationCoordinate2D *)coords
 										  count:(NSUInteger)count
 										  style:(MapOverlayPathStyle *)style;
+
 - (id)initWithCoords:(NSArray *)values
 			   style:(MapOverlayPathStyle *)style;
+
 - (id)initWithCoordinates:(CLLocationCoordinate2D *)coords
 					count:(NSUInteger)count
 					style:(MapOverlayPathStyle *)style;
+
 - (id)initWithPolyline:(MKPolyline *)line
 				 style:(MapOverlayPathStyle *)style;
 
@@ -127,16 +139,13 @@
 // ----------------------------------------------------------------------
 
 @interface MapOverlayRegion ()
-//@interface MapOverlayRegion : MapOverlay // MKPolygon //
-
-//@property (strong, nonatomic) MapOverlayPathStyle *style;
-@property (strong, nonatomic) MKPolygon		  *polygon;
-@property (strong, nonatomic) MKPolygonView	  *view;
 
 + (MapOverlayRegion *)regionWithMKRegion:(MKCoordinateRegion)region
 								   style:(MapOverlayPathStyle *)style;
+
 - (id)initWithMKRegion:(MKCoordinateRegion)region
 				 style:(MapOverlayPathStyle *)style;
+
 @end
 
 // ----------------------------------------------------------------------

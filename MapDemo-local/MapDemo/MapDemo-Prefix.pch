@@ -15,7 +15,7 @@
 	#import <Foundation/Foundation.h>
 #endif
 
-#define CONFIG_use_MapUtil	0
+#define CONFIG_use_MapUtil	1
 #define CONFIG_use_MapDemo	!CONFIG_use_MapUtil
 
 // thanks to 'yasirmturk' for his contribution to the stackoverflow.com thread "How to check iOS version?"

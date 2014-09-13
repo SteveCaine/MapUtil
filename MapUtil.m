@@ -2,13 +2,7 @@
 //	MapUtil.m
 //	MapUtil
 //
-//	MKMapPoint			- struct { double width; double height; }
-//
-//	MKShape
-//		MKCircle		- closed path around single point
-//		MKMultiPoint
-//			MKPolygon	- closed path of N points
-//			MKPolyline	- open path of ditto
+//	see description in header file
 //
 //	Created by Steve Caine on 05/21/14.
 //
@@ -141,7 +135,7 @@ NSUInteger coordsFromNSValues(CLLocationCoordinate2D **outCoords, NSArray* inVal
 	NSUInteger count = [inValues count];
 	if (count && outCoords) {
 		size_t size = sizeof(CLLocationCoordinate2D) * count;
-		//		*outCoords = malloc(size);
+//		*outCoords = malloc(size);
 		*outCoords = calloc(count, size);
 		CLLocationCoordinate2D *c = *outCoords;
 		
@@ -572,6 +566,10 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 + (void)testMapView:(MKMapView *)mapView withRegion:(MKCoordinateRegion)region {
 	
 	if (mapView != nil && MKCoordinateRegionIsValid(region)) {
+		// log current annotations/overlays (disabled)
+//		MyLog(@"=> annotations = %@", [mapView annotations]);
+//		d_Annotations(mapView, @"=> annotations = ");
+//		MyLog(@"=>	  overlays = %@", [mapView overlays]);
 #if 0
 		NSArray *coords2 = randomCoordsInRegion(region, 10);
 		annotationIndex = 0;
@@ -581,10 +579,6 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 		(void) [MapUtil mapView:mapView addPolylineOverlayForCoords:coords2];
 		MyLog(@"<=	  overlays = %@", [mapView overlays]);
 #else
-//		MyLog(@"=> annotations = %@", [mapView annotations]);
-//		d_Annotations(mapView, @"=> annotations = ");
-//		MyLog(@"=>	  overlays = %@", [mapView overlays]);
-		
 		// some random points for our poly overlays
 		NSArray *coords1 = randomCoordsInRegion(region, 10);
 		NSArray *coords2 = randomCoordsInRegion(region, 10);
@@ -599,7 +593,6 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 		CLLocationCoordinate2D coord = [[coords1 objectAtIndex:0] MKCoordinateValue];
 		(void) [MapUtil mapView:mapView addAnnotationForCoordinate:coord];
 #endif
-		
 		// set static globals for circle
 		annotationIndex = 0;
 		annotationImage = circleImage;
@@ -655,97 +648,13 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 
 		(void) [MapUtil mapView:mapView addPolygonOverlayForRegion:region scaled:0.75];
 		
+		// log updated annotations/overlays (disabled)
 //		MyLog(@"<= annotations = %@", [mapView annotations]);
 //		d_Annotations(mapView, @"<= annotations = ");
 //		MyLog(@"<=	  overlays = %@", [mapView overlays]);
 #endif
 	}
 }
-
-// ----------------------------------------------------------------------
-#pragma mark - MKMapViewDelegate
-// ----------------------------------------------------------------------
-
-+ (MKAnnotationView *) mapView:(MKMapView *)theMapView viewForAnnotation:(id <MKAnnotation>) annotation {
-	MKAnnotationView *result = nil;
-	
-	// POINT
-	if ([annotation isKindOfClass:[MapAnnotation class]])
-		result = [(MapAnnotation*)annotation annotationView];
-	else
-		// all other annotation classes
-		result = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
-	
-	return result;
-}
-
-+ (MKOverlayView *)mapView:(MKMapView *)mapView viewForOverlay:(id <MKOverlay>)overlay {
-	MKOverlayView *result = nil;
-	
-#if 0
-	// CIRCLE
-	if ([overlay isKindOfClass:[MapOverlayCircle class]]) {
-		result = [(MapOverlayCircle*)overlay overlayView];
-	}
-	else
-	
-	// POLYGON
-	if ([overlay isKindOfClass:[MapOverlayPolygon class]]) {
-		result = [(MapOverlayPolygon*)overlay overlayView];
-	}
-	else
-	
-	// POLYLINE
-	if ([overlay isKindOfClass:[MapOverlayPolyline class]]) {
-		result = [(MapOverlayPolyline*)overlay overlayView];
-	}
-	else
-	
-	// REGION
-	if ([overlay isKindOfClass:[MapOverlayRegion class]])
-		result = [(MapOverlayRegion*)overlay overlayView];
-#else
-	if ([overlay isKindOfClass:[MapOverlay class]])
-		result = [(MapOverlay *)overlay overlayView];
-#endif
-	else
-	
-	// STANDARD OVERLAYS & VIEWS
-	if ([overlay isKindOfClass:[MKCircle class]]) {
-		result = [[MKCircleView alloc] initWithOverlay:overlay];
-	}
-	else
-	
-	if ([overlay isKindOfClass:[MKPolygon class]]) {
-		result = [[MKPolygonView alloc] initWithOverlay:overlay];
-	}
-	else
-	
-	if ([overlay isKindOfClass:[MKPolyline class]]) {
-		result = [[MKPolylineView alloc] initWithOverlay:overlay];
-	}
-	
-	return result;
-}
-
-// ----------------------------------------------------------------------
-
-#if 0 //def __IPHONE_7_0
-+ (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id <MKOverlay>)overlay {
-	MKOverlayRenderer *result = nil;
-	
-#if 0	// POLYLINE
-	if ([overlay isKindOfClass:[MapOverlayPolyline class]]) {
-		result = [(MapOverlayPolyline*)overlay overlayRenderer];
-	}
-#else
-	if ([overlay isKindOfClass:[MapOverlay class]])
-		result = [(MapOverlay *)overlay overlayRenderer];
-#endif
-	
-	return result;
-}
-#endif
 
 // ----------------------------------------------------------------------
 

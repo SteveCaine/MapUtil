@@ -2,6 +2,22 @@
 //	ViewController.m
 //	MapDemo
 //
+//	iPad presentation of our custom map annotation and overlay classes
+//	either used directly - 'Demo 1'
+//	or via subclasses - 'Demo 2'
+//	that hide the base classes' implementation details
+//
+//	there are two ways that our custom overlay classes can be presented on the screen
+//	1 - MKOverlayView		iOS 4.0 and later, deprecated in iOS 7.0
+//	2 - MKOverlayRenderer	iOS 7.0 and later
+//	via the MKMapViewDelegate protocol's viewForOverlay and rendererForOverlay methods
+//
+//	this code supports iOS 6 and later, so it provides methods to return both
+//	where the latter is presented only if compiled in SDKs 7.0 and above
+//
+//	iOS itself determines which is called based on which protocol methods the overlay objects implement
+//	so we don't need runtime checks to see which iOS version is currently running
+//
 //	Created by Steve Caine on 07/15/14.
 //
 //	This code is distributed under the terms of the MIT license.
@@ -107,6 +123,7 @@
 	// PUT TEST CODE HERE
 	d_MKCoordinateRegion(adjustedRegion,	  @" adj region = ");
 	d_MKCoordinateRegion(self.mapView.region, @" map region = ");
+	
 #if CONFIG_use_MapUtil
 	// MapUtil tests
 	[MapUtil testMapView:self.mapView withRegion:adjustedRegion];
@@ -120,7 +137,6 @@
 #else
 	// MapDemo tests
 	[MapDemo demoInMapView:self.mapView withLocation:newLocation region:adjustedRegion];
-//	MapUserPoint *youAreHere = [MapUserPoint userWithLocation:newLocation];
 #endif
 }
 
@@ -150,64 +166,6 @@
 
 #pragma mark - MKMapViewDelegate
 
-- (MKAnnotationView *)mapView:(MKMapView *)aMapView viewForAnnotation:(id<MKAnnotation>)annotation {
-	MKAnnotationView *result = nil;
-	
-//	result = [MapUtil mapView:self.mapView viewForAnnotation:annotation];
-	
-	// OUR CUSTOM ANNOTATIONS
-#if CONFIG_use_MapUtil
-	result = [MapUtil mapView:self.mapView viewForAnnotation:annotation];
-	if (result == nil)
-#else
-	if ([annotation isKindOfClass:[MapAnnotation class]])
-		result = [(MapAnnotation*)annotation annotationView];
-	else
-#endif
-	
-	// STANDARD ANNOTATIONS
-	result = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
-	
-//	MyLog(@"%s returns %@", __FUNCTION__, result);
-	return result;
-}
-
-- (MKOverlayView *)mapView:(MKMapView *)mapView viewForOverlay:(id <MKOverlay>)overlay {
-	MKOverlayView *result = nil;
-	
-#if CONFIG_use_MapUtil
-	result = [MapUtil mapView:mapView viewForOverlay:overlay]; // handles standard overlays
-#else
-	// OUR CUSTOM OVERLAYS
-	if ([overlay isKindOfClass:[MapOverlay class]])
-		result = [(MapOverlay *)overlay overlayView];
-	
-	// STANDARD OVERLAYS
-	else if ([overlay isKindOfClass:[MKCircle class]]) {
-		result = [[MKCircleView alloc] initWithOverlay:overlay];
-	}
-	else if ([overlay isKindOfClass:[MKPolygon class]]) {
-		result = [[MKPolygonView alloc] initWithOverlay:overlay];
-	}
-	else if ([overlay isKindOfClass:[MKPolyline class]]) {
-		result = [[MKPolylineView alloc] initWithOverlay:overlay];
-	}
-#endif
-//	MyLog(@"%s returns %@", __FUNCTION__, result);
-	return result;
-}
-
-#if 0 //def __IPHONE_7_0
-- (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id <MKOverlay>)overlay {
-	MKOverlayRenderer *result = nil;
-#if CONFIG_use_MapUtil
-	result = [MapUtil mapView:mapView rendererForOverlay:overlay];
-#else
-#endif
-	return result;
-}
-#endif
-
 - (void)mapViewDidFailLoadingMap:(MKMapView *)aMapView withError:(NSError *)error {
 	NSLog(@"%s %@", __FUNCTION__, error);
 	
@@ -221,5 +179,63 @@
 										  otherButtonTitles:nil];
 	[alert show];
 }
+
+- (MKAnnotationView *)mapView:(MKMapView *)aMapView viewForAnnotation:(id<MKAnnotation>)annotation {
+	MKAnnotationView *result = nil;
+	
+	// OUR CUSTOM ANNOTATIONS
+	if ([annotation isKindOfClass:[MapAnnotation class]])
+		result = [(MapAnnotation*)annotation annotationView];
+	else
+		// STANDARD ANNOTATIONS
+		result = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
+	
+//	MyLog(@"%s returns %@", __FUNCTION__, result);
+	return result;
+}
+
+- (MKOverlayView *)mapView:(MKMapView *)mapView viewForOverlay:(id <MKOverlay>)overlay {
+	MKOverlayView *result = nil;
+	
+	// OUR CUSTOM OVERLAYS
+	if ([overlay isKindOfClass:[MapOverlay class]])
+		result = [(MapOverlay *)overlay overlayView];
+	
+	// STANDARD OVERLAYS
+	else if ([overlay isKindOfClass:[MKCircle class]])
+		result = [[MKCircleView alloc] initWithOverlay:overlay];
+	
+	else if ([overlay isKindOfClass:[MKPolygon class]])
+		result = [[MKPolygonView alloc] initWithOverlay:overlay];
+	
+	else if ([overlay isKindOfClass:[MKPolyline class]])
+		result = [[MKPolylineView alloc] initWithOverlay:overlay];
+
+//	MyLog(@"%s returns %@", __FUNCTION__, result);
+	return result;
+}
+
+#ifdef __IPHONE_7_0
+- (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id <MKOverlay>)overlay {
+	MKOverlayRenderer *result = nil;
+
+	// OUR CUSTOM OVERLAYS
+	if ([overlay isKindOfClass:[MapOverlay class]])
+		result = [(MapOverlay *)overlay overlayRenderer];
+	
+	// STANDARD OVERLAYS
+	else if ([overlay isKindOfClass:[MKCircle class]])
+		result = [[MKCircleRenderer alloc] initWithOverlay:overlay];
+	
+	else if ([overlay isKindOfClass:[MKPolygon class]])
+		result = [[MKPolygonRenderer alloc] initWithOverlay:overlay];
+	
+	else if ([overlay isKindOfClass:[MKPolyline class]])
+		result = [[MKPolylineRenderer alloc] initWithOverlay:overlay];
+
+//	MyLog(@"%s returns %@", __FUNCTION__, result);
+	return result;
+}
+#endif
 
 @end
