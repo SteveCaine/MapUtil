@@ -30,61 +30,135 @@
 
 #import "ViewController.h"
 
-#if CONFIG_use_MapUtil
-#	import "MapUtil.h"
-#	import "MapOverlays_private.h"
-#endif
+// for 'Demo 1'
+#import "MapUtil.h"
 
-#if CONFIG_use_MapDemo
-#	import "MapDemo.h"
-#endif
+// for 'Demo 2'
+#import "MapDemo.h"
 
 #import "Debug_iOS.h"
 #import "Debug_MapKit.h"
 
 #define str_selectLocationError	@"Did you forget to select a location\nin the Options panel\nof Xcode's Scheme Editor?"
 
+// ----------------------------------------------------------------------
+#pragma mark -
+// ----------------------------------------------------------------------
+
 @interface ViewController () <CLLocationManagerDelegate, MKMapViewDelegate>
 
 @property (	 weak, nonatomic) IBOutlet	MKMapView			*mapView;
-@property (strong, nonatomic)			CLLocationManager	*manager;
+@property (  weak, nonatomic) IBOutlet	UIButton			*btnDemo1;
+@property (  weak, nonatomic) IBOutlet	UIButton			*btnDemo2;
+@property (  weak, nonatomic) IBOutlet	UIButton			*btnClear;
+@property (strong, nonatomic)			CLLocationManager	*locationManager;
+@property (strong, nonatomic)			MapAnnotation		*userAnnotation;
+@property (assign, nonatomic)			BOOL				userOverlaysPresent;
 
-- (IBAction)btnGo;
-- (void)openCallout:(id<MKAnnotation>)annotation;
+- (IBAction)doDemo1;
+
+- (IBAction)doDemo2;
+
+- (IBAction)doClear;
+
+//- (void)openCallout:(id<MKAnnotation>)annotation;
 
 @end
 
+// ----------------------------------------------------------------------
 #pragma mark -
+// ----------------------------------------------------------------------
 
 @implementation ViewController
 
 //#pragma mark - globals
 
+// ----------------------------------------------------------------------
 #pragma mark - locals
+// ----------------------------------------------------------------------
 
-- (IBAction)btnGo {
-	if (self.manager == nil)
-		self.manager = [[CLLocationManager alloc] init];
+// NOTE: we use status >= for our buttons as iOS 8 adds
+// 'kCLAuthorizationStatusAuthorizedWhenInUse' just after this enum
+
+- (IBAction)doDemo1 {
+	if ([CLLocationManager authorizationStatus] >= kCLAuthorizationStatusAuthorized) {
+		// MapUtil tests
+		[MapUtil testMapView:self.mapView];
+		self.btnClear.enabled = YES;
+	}
 	
-	self.manager.delegate = self;
-	self.manager.desiredAccuracy = kCLLocationAccuracyBest;
-	[self.manager startUpdatingLocation];
+}
+
+- (IBAction)doDemo2 {
+	if ([CLLocationManager authorizationStatus] >= kCLAuthorizationStatusAuthorized) {
+		// MapDemo tests
+		[MapDemo demoInMapView:self.mapView withLocation:self.locationManager.location];
+		self.userOverlaysPresent = YES;
+		self.btnDemo2.enabled = NO;
+		self.btnClear.enabled = YES;
+	}
+}
+
+- (IBAction)doClear {
+//	MyLog(@"=> annotations = %@", [self.mapView annotations]);
+//	MyLog(@"=>	  overlays = %@", [self.mapView overlays]);
+	
+	// always keep our "You Are Here!" annotation
+	NSMutableArray *toRemove = [NSMutableArray arrayWithArray:self.mapView.annotations];
+	[toRemove removeObject:self.userAnnotation];
+	
+	[self.mapView removeAnnotations:toRemove];
+	[self.mapView removeOverlays:self.mapView.overlays];
+	self.userOverlaysPresent = NO;
+	
+//	MyLog(@"<= annotations = %@", [self.mapView annotations]);
+//	MyLog(@"<=	  overlays = %@", [self.mapView overlays]);
+	
+	self.btnClear.enabled = NO;
+	
+	if ([CLLocationManager authorizationStatus] >= kCLAuthorizationStatusAuthorized) {
+		self.btnDemo2.enabled = YES;
+	}
+}
+
+//userAnnotation
+- (void)addUserAnnotation:(CLLocation *)location {
+	if (self.userAnnotation == nil) {
+		// put annotation on user location
+		self.userAnnotation = [MapUserPoint userWithLocation:location title:@"You Are Here!"];
+		[self.mapView addAnnotation:self.userAnnotation];
+		[self openCallout:self.userAnnotation];
+	}
+	else {
+		[self.mapView removeAnnotation:self.userAnnotation];
+		self.userAnnotation = nil;
+	}
 }
 
 - (void)openCallout:(id<MKAnnotation>)annotation {
 	[self.mapView selectAnnotation:annotation animated:YES];
 }
 
+// ----------------------------------------------------------------------
 #pragma mark - view lifetime
+// ----------------------------------------------------------------------
 
 - (void)viewDidLoad {
 //	MyLog(@"\n%s", __FUNCTION__);
 	MyLog(@"\n%s for %@\n", __FUNCTION__, str_iOS_version());
 	[super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
+	
 	self.mapView.mapType = MKMapTypeStandard;
 //	self.mapView.mapType = MKMapTypeSatellite;
 //	self.mapView.mapType = MKMapTypeHybrid;
+
+	self.locationManager = [[CLLocationManager alloc] init];
+	self.locationManager.delegate = self;
+	self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+	[self.locationManager startUpdatingLocation];
+	
+	self.btnDemo1.enabled = self.btnClear.enabled = self.btnDemo2.enabled = NO;
 }
 
 - (void)didReceiveMemoryWarning {
@@ -92,16 +166,20 @@
 	// Dispose of any resources that can be recreated.
 }
 
+// ----------------------------------------------------------------------
 #pragma mark - CLLocationManagerDelegate
+// ----------------------------------------------------------------------
 
 // Deprecated in iOS 6.0
-- (void)locationManager:(CLLocationManager *)aManager
+- (void)locationManager:(CLLocationManager *)manager
 	didUpdateToLocation:(CLLocation *)newLocation
 		   fromLocation:(CLLocation *)oldLocation {
 	// ignore updates older than one minute (may be stale, cached data)
 	if ([newLocation.timestamp timeIntervalSince1970] < [NSDate timeIntervalSinceReferenceDate] - 60)
 		return;
-	MyLog(@"%s to %@", __FUNCTION__, newLocation);
+	
+	MyLog(@"%s to { %f, %f } %f meters (latitude/longitude/accuracy)", __FUNCTION__,
+		  newLocation.coordinate.latitude, newLocation.coordinate.longitude, newLocation.horizontalAccuracy);
 #ifdef DEBUG
 	if (0 && oldLocation != nil) {
 		NSDate *when = (oldLocation ? oldLocation.timestamp : nil);
@@ -112,7 +190,7 @@
 	}
 #endif
 	
-	[aManager stopUpdatingLocation];
+	[manager stopUpdatingLocation];
 	
 	MKCoordinateRegion viewRegion = MKCoordinateRegionMakeWithDistance(newLocation.coordinate, 2000, 2000);
 	
@@ -124,23 +202,24 @@
 	d_MKCoordinateRegion(adjustedRegion,	  @" adj region = ");
 	d_MKCoordinateRegion(self.mapView.region, @" map region = ");
 	
-#if CONFIG_use_MapUtil
-	// MapUtil tests
-	[MapUtil testMapView:self.mapView withRegion:adjustedRegion];
-	// one more annotation, this one right on top of our location
+	self.btnDemo1.enabled = YES;
+	self.btnDemo2.enabled = !self.userOverlaysPresent;
+	self.btnClear.enabled = ([self.mapView.annotations count] > 1 &&
+							 [self.mapView.overlays    count] > 0);
+	// put annotation on user location
+#if 1
+	[self performSelector:@selector(addUserAnnotation:) withObject:newLocation afterDelay:2.0];
+#else
 	MapAnnotation *youAreHere = [MapUtil mapView:self.mapView addAnnotationForCoordinate:newLocation.coordinate];
 	youAreHere.title = @"You Are Here!";
 	youAreHere.subtitle = @"This is here ... for certain!";
 	youAreHere.image = [UIImage imageNamed:@"red-16x16.png"];
 	youAreHere.reuseID = @"YourLocationAnnotation"; // optional
 	[self performSelector:@selector(openCallout:) withObject:youAreHere afterDelay:0.5];
-#else
-	// MapDemo tests
-	[MapDemo demoInMapView:self.mapView withLocation:newLocation region:adjustedRegion];
 #endif
 }
 
-- (void)locationManager:(CLLocationManager *)aManager didFailWithError:(NSError *)error {
+- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
 	NSLog(@"%s %@", __FUNCTION__, error);
 	
 	NSString *title = @"Error getting location";
@@ -164,7 +243,9 @@
 	[alert show];
 }
 
+// ----------------------------------------------------------------------
 #pragma mark - MKMapViewDelegate
+// ----------------------------------------------------------------------
 
 - (void)mapViewDidFailLoadingMap:(MKMapView *)aMapView withError:(NSError *)error {
 	NSLog(@"%s %@", __FUNCTION__, error);

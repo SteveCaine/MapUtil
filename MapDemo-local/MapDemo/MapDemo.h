@@ -22,7 +22,7 @@
 
 @interface MapUserPoint : MapAnnotation
 
-+ (MapUserPoint *)userWithLocation:(CLLocation *)location;
++ (MapUserPoint *)userWithLocation:(CLLocation *)location title:(NSString *)title;
 
 //- (id)initWithLocation:(CLLocation *)location;
 
@@ -71,6 +71,8 @@
 // ----------------------------------------------------------------------
 
 @interface MapDemo : NSObject
+
++ (void)demoInMapView:(MKMapView *)mapView withLocation:(CLLocation *)location;
 
 + (void)demoInMapView:(MKMapView *)mapView withLocation:(CLLocation *)location region:(MKCoordinateRegion)region;
 

@@ -15,9 +15,6 @@
 	#import <Foundation/Foundation.h>
 #endif
 
-#define CONFIG_use_MapUtil	1
-#define CONFIG_use_MapDemo	!CONFIG_use_MapUtil
-
 // thanks to 'yasirmturk' for his contribution to the stackoverflow.com thread "How to check iOS version?"
 // http://stackoverflow.com/questions/3339722/how-to-check-ios-version
 
@@ -28,7 +25,7 @@
 #define SYSTEM_VERSION_LESS_THAN(v)					([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
 #define SYSTEM_VERSION_LESS_THAN_OR_EQUAL_TO(v)		([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedDescending)
 
-// Usage
+// Usage`
 // if (SYSTEM_VERSION_LESS_THAN(@"4.0")) {
 //	...
 //}

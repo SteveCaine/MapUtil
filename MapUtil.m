@@ -563,6 +563,13 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 #pragma mark -
 // ----------------------------------------------------------------------
 
++ (void)testMapView:(MKMapView *)mapView {
+	if (mapView != nil) {
+		MKCoordinateRegion region = mapView.region;
+		[self testMapView:mapView withRegion:region];
+	}
+}
+
 + (void)testMapView:(MKMapView *)mapView withRegion:(MKCoordinateRegion)region {
 	
 	if (mapView != nil && MKCoordinateRegionIsValid(region)) {

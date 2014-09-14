@@ -104,6 +104,8 @@ NSArray *randomCoordsInRegion(MKCoordinateRegion region, NSUInteger count);
 
 // ----------------------------------------------------------------------
 
++ (void)testMapView:(MKMapView *)mapView;
+
 + (void)testMapView:(MKMapView *)mapView withRegion:(MKCoordinateRegion)region;
 
 // ----------------------------------------------------------------------
