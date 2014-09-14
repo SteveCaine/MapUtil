@@ -2,9 +2,9 @@
 //	ViewController.m
 //	MapDemo
 //
-//	iPad presentation of our custom map annotation and overlay classes
+//	iPad presentation of MapUtil's custom map annotation and overlay classes
 //	either used directly - 'Demo 1'
-//	or via subclasses - 'Demo 2'
+//	   or via subclasses - 'Demo 2'
 //	that hide the base classes' implementation details
 //
 //	there are two ways that our custom overlay classes can be presented on the screen
@@ -81,6 +81,7 @@
 // 'kCLAuthorizationStatusAuthorizedWhenInUse' just after this enum
 
 - (IBAction)doDemo1 {
+	MyLog(@"\nTapped button 'Demo 1'");
 	if ([CLLocationManager authorizationStatus] >= kCLAuthorizationStatusAuthorized) {
 		// MapUtil tests
 		[MapUtil testMapView:self.mapView];
@@ -90,6 +91,7 @@
 }
 
 - (IBAction)doDemo2 {
+	MyLog(@"\nTapped button 'Demo 2'");
 	if ([CLLocationManager authorizationStatus] >= kCLAuthorizationStatusAuthorized) {
 		// MapDemo tests
 		[MapDemo demoInMapView:self.mapView withLocation:self.locationManager.location];
@@ -100,6 +102,9 @@
 }
 
 - (IBAction)doClear {
+	MyLog(@"\nTapped button 'Clear' - Map has %i annotations and %i overlays.",
+		  [self.mapView.annotations count], [self.mapView.overlays count]);
+	
 //	MyLog(@"=> annotations = %@", [self.mapView annotations]);
 //	MyLog(@"=>	  overlays = %@", [self.mapView overlays]);
 	
@@ -121,17 +126,17 @@
 	}
 }
 
-//userAnnotation
 - (void)addUserAnnotation:(CLLocation *)location {
+	// for any location updates (IF -didUpdateToLocation:- is changed to NOT stop updating
+	if (self.userAnnotation) {
+		[self.mapView removeAnnotation:self.userAnnotation];
+		self.userAnnotation = nil;
+	}
 	if (self.userAnnotation == nil) {
 		// put annotation on user location
 		self.userAnnotation = [MapUserPoint userWithLocation:location title:@"You Are Here!"];
 		[self.mapView addAnnotation:self.userAnnotation];
 		[self openCallout:self.userAnnotation];
-	}
-	else {
-		[self.mapView removeAnnotation:self.userAnnotation];
-		self.userAnnotation = nil;
 	}
 }
 
@@ -198,25 +203,16 @@
 	
 	[self.mapView setRegion:adjustedRegion animated:YES];
 	
-	// PUT TEST CODE HERE
-	d_MKCoordinateRegion(adjustedRegion,	  @" adj region = ");
-	d_MKCoordinateRegion(self.mapView.region, @" map region = ");
+//	d_MKCoordinateRegion(adjustedRegion,	  @" adj region = ");
+//	d_MKCoordinateRegion(self.mapView.region, @" map region = ");
 	
 	self.btnDemo1.enabled = YES;
 	self.btnDemo2.enabled = !self.userOverlaysPresent;
 	self.btnClear.enabled = ([self.mapView.annotations count] > 1 &&
 							 [self.mapView.overlays    count] > 0);
+	
 	// put annotation on user location
-#if 1
 	[self performSelector:@selector(addUserAnnotation:) withObject:newLocation afterDelay:2.0];
-#else
-	MapAnnotation *youAreHere = [MapUtil mapView:self.mapView addAnnotationForCoordinate:newLocation.coordinate];
-	youAreHere.title = @"You Are Here!";
-	youAreHere.subtitle = @"This is here ... for certain!";
-	youAreHere.image = [UIImage imageNamed:@"red-16x16.png"];
-	youAreHere.reuseID = @"YourLocationAnnotation"; // optional
-	[self performSelector:@selector(openCallout:) withObject:youAreHere afterDelay:0.5];
-#endif
 }
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
