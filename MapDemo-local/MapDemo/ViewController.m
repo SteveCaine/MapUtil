@@ -39,7 +39,8 @@
 #import "Debug_iOS.h"
 #import "Debug_MapKit.h"
 
-#define str_selectLocationError	@"Did you forget to select a location\nin the Options panel\nof Xcode's Scheme Editor?"
+#define str_accessDeniedEror		@"Access Denied. Go to\nSettings -> Privacy -> Location\nto allow access to Location Services."
+#define str_simulateLocationError	@"Did you forget to select a location\nin the Options panel\nof Xcode's Scheme Editor?"
 
 // ----------------------------------------------------------------------
 #pragma mark -
@@ -219,13 +220,15 @@
 	NSLog(@"%s %@", __FUNCTION__, error);
 	
 	NSString *title = @"Error getting location";
-	NSString *message = (error.code == kCLErrorDenied ? @"Access Denied" : @"Unknown Error");
-	
+	NSString *message = @"Unknown Error";
+	if (error.code == kCLErrorDenied) {
+		message = str_accessDeniedEror;
+	}
 #ifdef DEBUG
-	if (error.code != kCLErrorDenied) {
+	else {
 		NSString *model = [[UIDevice currentDevice] model];
 		if ([model rangeOfString:@"Simulator"].location != NSNotFound) {
-			message = str_selectLocationError;
+			message = str_simulateLocationError;
 			NSLog(message);
 		}
 	}

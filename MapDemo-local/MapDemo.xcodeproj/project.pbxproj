@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8E20EDA119C3529D009F24DF /* MapDemo.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E20EDA019C3529D009F24DF /* MapDemo.m */; };
 		8E24CB8319C3A4FD00C98C5F /* UserDot.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E24CB8219C3A4FD00C98C5F /* UserDot.png */; };
 		8E24CB8619C3C56C00C98C5F /* RegionDot.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E24CB8419C3C56C00C98C5F /* RegionDot.png */; };
 		8E24CB8719C3C56C00C98C5F /* VicinityDot.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E24CB8519C3C56C00C98C5F /* VicinityDot.png */; };
@@ -34,6 +33,7 @@
 		8E4CBE5B19758D7C00C4A870 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E4CBE3D19758D7C00C4A870 /* UIKit.framework */; };
 		8E4CBE6319758D7C00C4A870 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8E4CBE6119758D7C00C4A870 /* InfoPlist.strings */; };
 		8E4CBE6519758D7C00C4A870 /* MapDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E4CBE6419758D7C00C4A870 /* MapDemoTests.m */; };
+		8EE3482719CCE077003E3CBD /* MapDemo.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EE3482619CCE077003E3CBD /* MapDemo.m */; };
 		8EE547611975A39F003602E1 /* Harvard Square.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8EE5475F1975A39F003602E1 /* Harvard Square.gpx */; };
 		8EE547621975A39F003602E1 /* White House.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8EE547601975A39F003602E1 /* White House.gpx */; };
 		8EE547681975A3AA003602E1 /* blue-16x16.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE547641975A3AA003602E1 /* blue-16x16.png */; };
@@ -55,8 +55,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		8E20ED9F19C3529D009F24DF /* MapDemo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapDemo.h; sourceTree = "<group>"; };
-		8E20EDA019C3529D009F24DF /* MapDemo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MapDemo.m; sourceTree = "<group>"; };
 		8E24CB8219C3A4FD00C98C5F /* UserDot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = UserDot.png; sourceTree = "<group>"; };
 		8E24CB8419C3C56C00C98C5F /* RegionDot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = RegionDot.png; sourceTree = "<group>"; };
 		8E24CB8519C3C56C00C98C5F /* VicinityDot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = VicinityDot.png; sourceTree = "<group>"; };
@@ -93,6 +91,8 @@
 		8E4CBE6019758D7C00C4A870 /* MapDemoTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MapDemoTests-Info.plist"; sourceTree = "<group>"; };
 		8E4CBE6219758D7C00C4A870 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		8E4CBE6419758D7C00C4A870 /* MapDemoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MapDemoTests.m; sourceTree = "<group>"; };
+		8EE3482519CCE077003E3CBD /* MapDemo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapDemo.h; sourceTree = "<group>"; };
+		8EE3482619CCE077003E3CBD /* MapDemo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MapDemo.m; sourceTree = "<group>"; };
 		8EE5475F1975A39F003602E1 /* Harvard Square.gpx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "Harvard Square.gpx"; sourceTree = "<group>"; };
 		8EE547601975A39F003602E1 /* White House.gpx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "White House.gpx"; sourceTree = "<group>"; };
 		8EE547641975A3AA003602E1 /* blue-16x16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "blue-16x16.png"; sourceTree = "<group>"; };
@@ -159,6 +159,8 @@
 				8E4256B119759D0500906920 /* MapOverlays.m */,
 				8E4256B919759F5D00906920 /* MapUtil.h */,
 				8E4256BA19759F5D00906920 /* MapUtil.m */,
+				8EE3482519CCE077003E3CBD /* MapDemo.h */,
+				8EE3482619CCE077003E3CBD /* MapDemo.m */,
 			);
 			name = MapUtil;
 			path = ..;
@@ -202,8 +204,6 @@
 		8E4CBE3F19758D7C00C4A870 /* MapDemo */ = {
 			isa = PBXGroup;
 			children = (
-				8E20ED9F19C3529D009F24DF /* MapDemo.h */,
-				8E20EDA019C3529D009F24DF /* MapDemo.m */,
 				8E4CBE4819758D7C00C4A870 /* AppDelegate.h */,
 				8E4CBE4919758D7C00C4A870 /* AppDelegate.m */,
 				8E4CBE4B19758D7C00C4A870 /* Main.storyboard */,
@@ -384,13 +384,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				8E4256BB19759F5D00906920 /* MapUtil.m in Sources */,
-				8E20EDA119C3529D009F24DF /* MapDemo.m in Sources */,
 				8E4256AE19759C8C00906920 /* Debug_iOS.m in Sources */,
 				8E4256B219759D0500906920 /* MapOverlays.m in Sources */,
 				8E4CBE5019758D7C00C4A870 /* ViewController.m in Sources */,
 				8E4256B819759EDC00906920 /* Debug_MapKit.m in Sources */,
 				8E4CBE4A19758D7C00C4A870 /* AppDelegate.m in Sources */,
 				8E4CBE4619758D7C00C4A870 /* main.m in Sources */,
+				8EE3482719CCE077003E3CBD /* MapDemo.m in Sources */,
 				8E4256AD19759C8C00906920 /* Debug_iOS.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
