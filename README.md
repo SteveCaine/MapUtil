@@ -35,5 +35,5 @@ To use the demo:
 
 This code is distributed under the terms of the MIT license. See file "LICENSE" in this repository for details.
 
-Copyright (c) 2014 Steve Caine.
+Copyright (c) 2014 Steve Caine.<br>
 @SteveCaine on github.com
