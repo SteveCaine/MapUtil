@@ -15,6 +15,8 @@ My 'DebugUtil' public repository, also on GitHub, contains debug code to log inf
 
 In addition, this repository contains a simple app to demonstrate the use of this code. It is designed to work where this repository and the 'DebugUtil' repository have been cloned side-by-side in the same folder on the developer's Mac. 
 
+This code uses code in my other public repositories on the assumption all have been copied/cloned to the same parent folder. To simplify this, each repository includes the Unix script 'cloneall' to automate this operation, with detailed instructions on its use.
+
 To use the demo:
 
 - Open MapDemo app project.
