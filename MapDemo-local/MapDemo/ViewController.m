@@ -13,7 +13,7 @@
 //	via the MKMapViewDelegate protocol's viewForOverlay and rendererForOverlay methods
 //
 //	this code supports iOS 6 and later, so it provides methods to return both
-//	where the latter is presented only if compiled in SDKs 7.0 and above
+//	where the latter is presented only if compiled in SDKs 7.0 and above and run in iOS 7 and above
 //
 //	iOS itself determines which is called based on which protocol methods the overlay objects implement
 //	so we don't need runtime checks to see which iOS version is currently running
