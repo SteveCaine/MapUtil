@@ -181,7 +181,7 @@
 	didUpdateToLocation:(CLLocation *)newLocation
 		   fromLocation:(CLLocation *)oldLocation {
 	// ignore updates older than one minute (may be stale, cached data)
-	if ([newLocation.timestamp timeIntervalSince1970] < [NSDate timeIntervalSinceReferenceDate] - 60)
+	if ([newLocation.timestamp timeIntervalSinceReferenceDate] < [NSDate timeIntervalSinceReferenceDate] - 60)
 		return;
 	
 	MyLog(@"%s to { %f, %f } %f meters (latitude/longitude/accuracy)", __FUNCTION__,
