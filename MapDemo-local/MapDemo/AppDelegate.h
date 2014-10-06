@@ -15,4 +15,8 @@
 
 @property (strong, nonatomic) UIWindow *window;
 
++ (UIApplicationState)currentState;
+
++ (UIViewController *)currentViewController;
+
 @end

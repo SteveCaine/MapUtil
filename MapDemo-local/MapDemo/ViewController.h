@@ -15,4 +15,6 @@
 
 @interface ViewController : UIViewController
 
+- (void)handle_applicationDidBecomeActive;
+
 @end

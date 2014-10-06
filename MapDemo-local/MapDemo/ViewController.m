@@ -15,8 +15,8 @@
 //	this code supports iOS 6 and later, so it provides methods to return both
 //	where the latter is presented only if compiled in SDKs 7.0 and above and run in iOS 7 and above
 //
-//	iOS itself determines which is called based on which protocol methods the overlay objects implement
-//	so we don't need runtime checks to see which iOS version is currently running
+//	iOS itself determines whether 'view' or 'renderer' is called based on which protocol methods 
+//	the overlay objects implement, so we don't need runtime checks to see which iOS version is currently running
 //
 //	Created by Steve Caine on 07/15/14.
 //
@@ -30,6 +30,8 @@
 
 #import "ViewController.h"
 
+#import "AppDelegate.h"
+
 // for 'Demo 1'
 #import "MapUtil.h"
 
@@ -39,7 +41,10 @@
 #import "Debug_iOS.h"
 #import "Debug_MapKit.h"
 
-#define str_accessDeniedEror		@"Access Denied. Go to\nSettings -> Privacy -> Location\nto allow access to Location Services."
+#define str_cantGetUserLocation		@"Can’t Get User Location"
+#define str_errorGettingLocation	@"Error getting location"
+
+#define str_accessDeniedEror		@"Access Denied. Please go to\nSettings -> Privacy -> Location\nto allow access to Location Services."
 #define str_simulateLocationError	@"Did you forget to select a location\nin the Options panel\nof Xcode's Scheme Editor?"
 
 // ----------------------------------------------------------------------
@@ -52,9 +57,11 @@
 @property (  weak, nonatomic) IBOutlet	UIButton			*btnDemo1;
 @property (  weak, nonatomic) IBOutlet	UIButton			*btnDemo2;
 @property (  weak, nonatomic) IBOutlet	UIButton			*btnClear;
+
 @property (strong, nonatomic)			CLLocationManager	*locationManager;
 @property (strong, nonatomic)			MapAnnotation		*userAnnotation;
 @property (assign, nonatomic)			BOOL				userOverlaysPresent;
+@property (assign, nonatomic)			NSUInteger			alertsShown;
 
 - (IBAction)doDemo1;
 
@@ -62,7 +69,7 @@
 
 - (IBAction)doClear;
 
-//- (void)openCallout:(id<MKAnnotation>)annotation;
+- (void)showAlertWithTitle:(NSString *)title message:(NSString *)message;
 
 @end
 
@@ -71,8 +78,6 @@
 // ----------------------------------------------------------------------
 
 @implementation ViewController
-
-//#pragma mark - globals
 
 // ----------------------------------------------------------------------
 #pragma mark - locals
@@ -88,7 +93,6 @@
 		[MapUtil testMapView:self.mapView];
 		self.btnClear.enabled = YES;
 	}
-	
 }
 
 - (IBAction)doDemo2 {
@@ -109,9 +113,12 @@
 //	MyLog(@"=> annotations = %@", [self.mapView annotations]);
 //	MyLog(@"=>	  overlays = %@", [self.mapView overlays]);
 	
-	// always keep our "You Are Here!" annotation
+	// always keep our "You Are Here!" annotation (unless user has disabled Location Services)
 	NSMutableArray *toRemove = [NSMutableArray arrayWithArray:self.mapView.annotations];
-	[toRemove removeObject:self.userAnnotation];
+	if ([CLLocationManager authorizationStatus] >= kCLAuthorizationStatusAuthorized)
+		[toRemove removeObject:self.userAnnotation];
+	else
+		self.userAnnotation = nil; // it's about to be removed
 	
 	[self.mapView removeAnnotations:toRemove];
 	[self.mapView removeOverlays:self.mapView.overlays];
@@ -122,9 +129,14 @@
 	
 	self.btnClear.enabled = NO;
 	
-	if ([CLLocationManager authorizationStatus] >= kCLAuthorizationStatusAuthorized) {
+	if ([CLLocationManager authorizationStatus] >= kCLAuthorizationStatusAuthorized)
 		self.btnDemo2.enabled = YES;
+	else
+		self.btnDemo1.enabled = self.btnClear.enabled = self.btnDemo2.enabled = NO;
 	}
+
+- (void)openCallout:(id<MKAnnotation>)annotation {
+	[self.mapView selectAnnotation:annotation animated:YES];
 }
 
 - (void)addUserAnnotation:(CLLocation *)location {
@@ -141,8 +153,39 @@
 	}
 }
 
-- (void)openCallout:(id<MKAnnotation>)annotation {
-	[self.mapView selectAnnotation:annotation animated:YES];
+- (void)showAlertWithTitle:(NSString *)title message:(NSString *)message {
+#ifdef DEBUG
+	MyLog(@"ALERT: '%@' - '%@'",
+		  [title   stringByReplacingOccurrencesOfString:@"\n" withString:@" "],
+		  [message stringByReplacingOccurrencesOfString:@"\n" withString:@" "]);
+#endif
+	title = [title stringByAppendingString:[NSString stringWithFormat:@" (%i)", (int) ++self.alertsShown]];
+	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
+													message:message
+												   delegate:nil
+										  cancelButtonTitle:@"OK"
+										  otherButtonTitles:nil];
+	[alert show];
+}
+
+// ----------------------------------------------------------------------
+#pragma mark - globals
+// ----------------------------------------------------------------------
+
+- (void)handle_applicationDidBecomeActive {
+	MyLog(@"%s", __FUNCTION__);
+	MyLog(@" app is '%@', status is '%@'", str_curAppState(), str_curCLAuthorizationStatus());
+	CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
+	if (status == kCLAuthorizationStatusDenied) {
+		if ([self.mapView.annotations count] || [self.mapView.overlays count])
+			[self doClear];
+		// call every time we become active (since app is useless w/o access)
+		[self showAlertWithTitle:str_cantGetUserLocation message:str_accessDeniedEror];
+	}
+	// are we coming back after user has changed status to active?
+	else if (status >= kCLAuthorizationStatusAuthorized && self.userAnnotation == nil) {
+		[self.locationManager startUpdatingLocation];
+	}
 }
 
 // ----------------------------------------------------------------------
@@ -151,17 +194,33 @@
 
 - (void)viewDidLoad {
 //	MyLog(@"\n%s", __FUNCTION__);
-	MyLog(@"\n%s for %@\n", __FUNCTION__, str_iOS_version());
+	MyLog(@"\n%s for iOS %@\n", __FUNCTION__, str_iOS_version());
 	[super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
 	
+	if (SYSTEM_VERSION_LESS_THAN(@"7.0")) {
+		// hard to believe iOS 6 doesn't do something like this by default
+		UIColor *dimColor = [[self.btnDemo1 titleColorForState:UIControlStateNormal]  colorWithAlphaComponent:0.5];
+		[self.btnDemo1 setTitleColor:dimColor forState:UIControlStateDisabled];
+		[self.btnDemo2 setTitleColor:dimColor forState:UIControlStateDisabled];
+		[self.btnClear setTitleColor:dimColor forState:UIControlStateDisabled];
+	}
+	
+	// choose one
 	self.mapView.mapType = MKMapTypeStandard;
 //	self.mapView.mapType = MKMapTypeSatellite;
 //	self.mapView.mapType = MKMapTypeHybrid;
 
+	// normally we would call
+	//		[CLLocationManager locationServicesEnabled]
+	// here, and only ask once that user enable it;
+	// but since the entire purpose of this app is to use locations,
+	// we'll keep asking every time handle_applicationDidBecomeActive is called
+	// until access is allowed
+	
 	self.locationManager = [[CLLocationManager alloc] init];
 	self.locationManager.delegate = self;
-	self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+	self.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters;
 	[self.locationManager startUpdatingLocation];
 	
 	self.btnDemo1.enabled = self.btnClear.enabled = self.btnDemo2.enabled = NO;
@@ -176,36 +235,17 @@
 #pragma mark - CLLocationManagerDelegate
 // ----------------------------------------------------------------------
 
-// Deprecated in iOS 6.0
 - (void)locationManager:(CLLocationManager *)manager
-	didUpdateToLocation:(CLLocation *)newLocation
-		   fromLocation:(CLLocation *)oldLocation {
-	// ignore updates older than one minute (may be stale, cached data)
-	if ([newLocation.timestamp timeIntervalSinceReferenceDate] < [NSDate timeIntervalSinceReferenceDate] - 60)
-		return;
+	 didUpdateLocations:(NSArray *)locations {
+	MyLog(@"%s %@", __FUNCTION__, locations);
+	MyLog(@" manager.location = %@", manager.location);
 	
-	MyLog(@"%s to { %f, %f } %f meters (latitude/longitude/accuracy)", __FUNCTION__,
-		  newLocation.coordinate.latitude, newLocation.coordinate.longitude, newLocation.horizontalAccuracy);
-#ifdef DEBUG
-	if (0 && oldLocation != nil) {
-		NSDate *when = (oldLocation ? oldLocation.timestamp : nil);
-		NSTimeInterval then = (when ? [when timeIntervalSinceNow] : 0);
-		NSString *str = (then ? [NSString stringWithFormat:@" (%+.2f sec)", -then] : @"");
-		CLLocationDistance moved = [newLocation distanceFromLocation:oldLocation];
-		MyLog(@"%s moved %.1f meters as of %.2f seconds ago%@", __FUNCTION__, moved, -[newLocation.timestamp timeIntervalSinceNow], str);
-	}
-#endif
+	CLLocation *newLocation = [locations lastObject]; // objects in order received
 	
 	[manager stopUpdatingLocation];
 	
-	MKCoordinateRegion viewRegion = MKCoordinateRegionMakeWithDistance(newLocation.coordinate, 2000, 2000);
-	
-	MKCoordinateRegion adjustedRegion = [self.mapView regionThatFits:viewRegion]; // unnecessary?
-	
-	[self.mapView setRegion:adjustedRegion animated:YES];
-	
-//	d_MKCoordinateRegion(adjustedRegion,	  @" adj region = ");
-//	d_MKCoordinateRegion(self.mapView.region, @" map region = ");
+	MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(newLocation.coordinate, 2000, 2000); // 2km x 2km
+	[self.mapView setRegion:region animated:YES];
 	
 	self.btnDemo1.enabled = YES;
 	self.btnDemo2.enabled = !self.userOverlaysPresent;
@@ -218,6 +258,8 @@
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
 	NSLog(@"%s %@", __FUNCTION__, error);
+	d_CLError(error.code, @" err = ");
+	MyLog(@" app is '%@', status is '%@'", str_curAppState(), str_curCLAuthorizationStatus());
 	
 	NSString *title = @"Error getting location";
 	NSString *message = @"Unknown Error";
@@ -233,13 +275,12 @@
 		}
 	}
 #endif
-	
-	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
-													message:message
-												   delegate:nil
-										  cancelButtonTitle:@"OK"
-										  otherButtonTitles:nil];
-	[alert show];
+	[self showAlertWithTitle:title message:message];
+}
+
+- (void)	 locationManager:(CLLocationManager *)manager
+didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
+	MyLog(@"%s '%@' - cur app state is '%@'", __FUNCTION__, str_CLAuthorizationStatus(status), str_curAppState());
 }
 
 // ----------------------------------------------------------------------
@@ -274,6 +315,7 @@
 	return result;
 }
 
+// for iOS 6 and earlier
 - (MKOverlayView *)mapView:(MKMapView *)mapView viewForOverlay:(id <MKOverlay>)overlay {
 	MKOverlayView *result = nil;
 	
@@ -295,6 +337,7 @@
 	return result;
 }
 
+// for iOS 7 and later
 #ifdef __IPHONE_7_0
 - (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id <MKOverlay>)overlay {
 	MKOverlayRenderer *result = nil;

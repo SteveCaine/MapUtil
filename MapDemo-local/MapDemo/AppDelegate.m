@@ -11,9 +11,51 @@
 
 #import "AppDelegate.h"
 
+#import "ViewController.h"
+
 #import "Debug_iOS.h"
 
 @implementation AppDelegate
+
+// ----------------------------------------------------------------------
+#pragma mark - locals
+// ----------------------------------------------------------------------
+
++ (ViewController *)ourViewController {
+	ViewController *result = nil;
+	
+	UIViewController *vc = [AppDelegate currentViewController];
+	if ([vc isKindOfClass:[ViewController class]])
+		result = (ViewController *)vc;
+	
+	return result;
+}
+
+// ----------------------------------------------------------------------
+#pragma mark - globals
+// ----------------------------------------------------------------------
+
++ (UIApplicationState)currentState {
+	UIApplication *app = [UIApplication sharedApplication];
+	return app.applicationState;
+}
+
++ (UIViewController *)currentViewController {
+	UIViewController *result = nil;
+	
+	UIApplication *app = [UIApplication sharedApplication];
+	AppDelegate *delegate = app.delegate;
+	UIWindow *window = delegate.window;
+	// since we only HAVE one view controller, it must be the root VC
+	result = window.rootViewController;
+	//	MyLog(@"%s returns %@", __FUNCTION__, result);
+	
+	return result;
+}
+
+// ----------------------------------------------------------------------
+#pragma mark - overrides
+// ----------------------------------------------------------------------
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 #ifdef DEBUG
@@ -54,6 +96,7 @@
 - (void)applicationDidBecomeActive:(UIApplication *)application {
 	MyLog(@"\n%s", __FUNCTION__);
 	// Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+	[[AppDelegate ourViewController] handle_applicationDidBecomeActive];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {

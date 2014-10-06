@@ -158,6 +158,7 @@
 	MKMapRect result = {0,0,0,0};
 	return result;
 }
+// deprecated in iOS 7
 - (MKOverlayPathView *)overlayView {
 	MKOverlayPathView *result = nil;
 #ifdef DEBUG
@@ -218,6 +219,7 @@
 	return self.circle.boundingMapRect;
 }
 
+// deprecated in iOS 7
 - (MKOverlayPathView *)overlayView {
 	if (self.view == nil) {
 		self.view = [[MKCircleView alloc] initWithOverlay:self];
@@ -340,6 +342,7 @@
 	[self.polygon getCoordinates:coords range:range];
 }
 
+// deprecated in iOS 7
 - (MKOverlayPathView *)overlayView {
 	if (self.view == nil) {
 		self.view = [[MKPolygonView alloc] initWithOverlay:self];
@@ -447,6 +450,7 @@
 	[self.polyline getCoordinates:coords range:range];
 }
 
+// deprecated in iOS 7
 - (MKOverlayPathView *)overlayView {
 	if (self.view == nil) {
 		self.view = [[MKPolylineView alloc] initWithOverlay:self];
@@ -529,6 +533,7 @@
 	return nil;
 }
 
+// deprecated in iOS 7
 - (MKOverlayPathView *)overlayView {
 	if (self.view == nil) {
 		self.view = [[MKPolygonView alloc] initWithOverlay:self];
