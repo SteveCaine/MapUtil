@@ -19,7 +19,7 @@
 //	so we don't need runtime checks there to see which iOS version is currently running
 //
 //	this code has been updated to work with the new iSO 8 logic for granting access to the user's location
-//	while still being compatible with running in iOS 7
+//	while still being compatible with running in iOS 7 (and even iOS 6)
 //
 //	Created by Steve Caine on 07/15/14.
 //
@@ -427,6 +427,8 @@
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
 	NSLog(@"%s %@", __FUNCTION__, [error localizedDescription]);
 	d_CLError(error.code, @" err = ");
+	MyLog(@" app is '%@', status is '%@'", str_curAppState(), str_curCLAuthorizationStatus());
+	
 	if (error.code == kCLErrorDenied) {
 		// only show if no previous alerts are pending
 		if (self.alertsPending <= 0)
