@@ -13,7 +13,7 @@ My 'DebugUtil' public repository, also on GitHub, contains debug code to log inf
 
 * Debug_MapKit.[h/m] - code to write data of various CoreLocation and MapKit structs and classes to Xcode's debugger console.
 
-In addition, this repository contains a simple app to demonstrate the use of this code. It is designed to work where this repository and the 'DebugUtil' repository have been cloned side-by-side in the same folder on the developer's Mac. To simplify this, my GitHub repository 'unix-scripts' includes a script named 'cloneall' to automate the download of all my public repositories to a single Mac folder, which contains detailed instructions on its use. 
+In addition, this repository contains a simple app to demonstrate the use of this code. It is designed to work where this repository and the 'DebugUtil' repository have been cloned side-by-side in the same folder on the developer's Mac. To simplify this, my GitHub repository 'unix-scripts' includes a script named 'cloneall' to automate the download of all my public repositories to a single Mac folder; the script contains detailed instructions on its use. 
 
 To use the demo:
 
