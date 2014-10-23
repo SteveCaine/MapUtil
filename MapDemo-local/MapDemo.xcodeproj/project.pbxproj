@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8E1DF5A619DB2843008D502F /* MapDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E4CBE6419758D7C00C4A870 /* MapDemoTests.m */; };
 		8E24CB8319C3A4FD00C98C5F /* UserDot.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E24CB8219C3A4FD00C98C5F /* UserDot.png */; };
 		8E24CB8619C3C56C00C98C5F /* RegionDot.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E24CB8419C3C56C00C98C5F /* RegionDot.png */; };
 		8E24CB8719C3C56C00C98C5F /* VicinityDot.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E24CB8519C3C56C00C98C5F /* VicinityDot.png */; };
@@ -32,7 +33,6 @@
 		8E4CBE5A19758D7C00C4A870 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E4CBE3919758D7C00C4A870 /* Foundation.framework */; };
 		8E4CBE5B19758D7C00C4A870 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E4CBE3D19758D7C00C4A870 /* UIKit.framework */; };
 		8E4CBE6319758D7C00C4A870 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8E4CBE6119758D7C00C4A870 /* InfoPlist.strings */; };
-		8E4CBE6519758D7C00C4A870 /* MapDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E4CBE6419758D7C00C4A870 /* MapDemoTests.m */; };
 		8EE3482719CCE077003E3CBD /* MapDemo.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EE3482619CCE077003E3CBD /* MapDemo.m */; };
 		8EE547611975A39F003602E1 /* Harvard Square.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8EE5475F1975A39F003602E1 /* Harvard Square.gpx */; };
 		8EE547621975A39F003602E1 /* White House.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8EE547601975A39F003602E1 /* White House.gpx */; };
@@ -399,7 +399,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8E4CBE6519758D7C00C4A870 /* MapDemoTests.m in Sources */,
+				8E1DF5A619DB2843008D502F /* MapDemoTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -473,7 +473,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 2;
@@ -506,7 +506,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 2;
 				VALIDATE_PRODUCT = YES;

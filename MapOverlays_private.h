@@ -51,7 +51,7 @@
 @interface MapOverlay ()
 
 @property (strong, nonatomic) MapOverlayPathStyle	*style;
-@property (strong, nonatomic) MKOverlayPathView		*view;
+@property (strong, nonatomic) MKOverlayPathView		*view; // deprecated in iOS 7
 #ifdef __IPHONE_7_0
 @property (strong, nonatomic) MKOverlayPathRenderer	*renderer;
 #endif

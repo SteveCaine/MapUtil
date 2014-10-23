@@ -1,7 +1,7 @@
 MapUtil
 =======
 
-This repository contains custom map annotation and map overlay classes for use in apps running iOS 6 and higher, as well as utility code to simplify the use of these classes. These are contained in the files:
+This repository contains custom map annotation and map overlay classes for use in apps running iOS 6 and higher, including iOS 8, as well as utility code to simplify the use of these classes. These are contained in the files:
 
 * MapOverlay.[h/m] - Classes implementing MKAnnotation and MKOverlay protocols for all subclasses of MKShape: points, circles, polygons, and polylines, as well as polygons based on MKRegions.
 
@@ -13,9 +13,7 @@ My 'DebugUtil' public repository, also on GitHub, contains debug code to log inf
 
 * Debug_MapKit.[h/m] - code to write data of various CoreLocation and MapKit structs and classes to Xcode's debugger console.
 
-In addition, this repository contains a simple app to demonstrate the use of this code. It is designed to work where this repository and the 'DebugUtil' repository have been cloned side-by-side in the same folder on the developer's Mac. 
-
-This code uses code in my other public repositories on the assumption all have been copied/cloned to the same parent folder. To simplify this, each repository includes the Unix script 'cloneall' to automate this operation, with detailed instructions on its use.
+In addition, this repository contains a simple app to demonstrate the use of this code. It is designed to work where this repository and the 'DebugUtil' repository have been cloned side-by-side in the same folder on the developer's Mac. To simplify this, my GitHub repository 'unix-scripts' includes a script named 'cloneall' to automate the download of all my public repositories to a single Mac folder, which contains detailed instructions on its use. 
 
 To use the demo:
 
@@ -23,7 +21,11 @@ To use the demo:
 
 - Select iPad Simulator in top-left popup menu (or iOS device if an iPad is attached to your development Mac). 
 
-- For the simulator, open 'Edit Scheme' dialog ('Cmd-Shift-,'), select the 'Options' tab, and make a selection in the 'Default Location' popup menu under the 'Allow Location Simulation' checkbox (make sure checkbox is checked). Besides the standard locations Xcode offers, two .gpx files are included in this project to simulate the locations of Harvard Square in Cambridge MA and the White House in Washington DC.
+- For the simulator, there are two ways to get location updates:
+
+	1. In iOS Simulator, under the 'Debug' menu, click on the 'Locations' item and select 'Apple' to get location updates for Apple Inc. HQ in Cupertino CA. (Or select one of the items for simulated location updates from a moving device. This app will just use the first update.)
+
+	2. In Xcode, open the  'Edit Scheme' dialog ('Cmd-Shift-,'), select the 'Options' tab, and make a selection in the 'Default Location' popup menu under the 'Allow Location Simulation' checkbox (make sure checkbox is checked). Besides the standard locations Xcode offers, two .gpx files are included in this project to simulate the locations of Harvard Square in Cambridge MA and the White House in Washington DC.
 
 - A device will use its built-in location hardware and software. 
 

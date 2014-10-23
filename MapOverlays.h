@@ -80,6 +80,7 @@
 
 @interface MapOverlay : NSObject <MKOverlay>
 
+// deprecated in iOS 7
 - (MKOverlayView *)overlayView;
 
 #ifdef __IPHONE_7_0

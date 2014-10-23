@@ -380,6 +380,13 @@ NSArray *randomCoordsInRegion(MKCoordinateRegion region, NSUInteger count) {
 
 @implementation MapUtil
 
++ (NSString *)locationString:(CLLocation *)location {
+	CLLocationCoordinate2D c = location.coordinate;
+	NSString *str_latitude  = [NSString stringWithFormat:@"%3f %s", fabs(c.latitude),  (c.latitude  > 0 ? "N" : "S")];
+	NSString *str_longitude = [NSString stringWithFormat:@"%4f %s", fabs(c.longitude), (c.longitude > 0 ? "E" : "W")];
+	return [NSString stringWithFormat:@"%@, %@", str_latitude, str_longitude];
+}
+
 + (MapAnnotation *)mapView:(MKMapView *)mapView
 	 addAnnotationForCoordinate:(CLLocationCoordinate2D)coord {
 	MapAnnotation *result = nil;
@@ -577,29 +584,11 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 //		MyLog(@"=> annotations = %@", [mapView annotations]);
 //		d_Annotations(mapView, @"=> annotations = ");
 //		MyLog(@"=>	  overlays = %@", [mapView overlays]);
-#if 0
-		NSArray *coords2 = randomCoordsInRegion(region, 10);
-		annotationIndex = 0;
-		annotationImage = polylineImage;
-		annotationPrefix = @"polyline";
-		MyLog(@"=>	  overlays = %@", [mapView overlays]);
-		(void) [MapUtil mapView:mapView addPolylineOverlayForCoords:coords2];
-		MyLog(@"<=	  overlays = %@", [mapView overlays]);
-#else
+		
 		// some random points for our poly overlays
 		NSArray *coords1 = randomCoordsInRegion(region, 10);
 		NSArray *coords2 = randomCoordsInRegion(region, 10);
 		
-#if 0 // instead we set single point in ViewController's 'didUpdateToLocation:'
-		// set static globals for point
-		annotationIndex = 0;
-		annotationImage = pointImage;
-		annotationPrefix = @"single";
-		
-		// point
-		CLLocationCoordinate2D coord = [[coords1 objectAtIndex:0] MKCoordinateValue];
-		(void) [MapUtil mapView:mapView addAnnotationForCoordinate:coord];
-#endif
 		// set static globals for circle
 		annotationIndex = 0;
 		annotationImage = circleImage;
@@ -659,7 +648,6 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 //		MyLog(@"<= annotations = %@", [mapView annotations]);
 //		d_Annotations(mapView, @"<= annotations = ");
 //		MyLog(@"<=	  overlays = %@", [mapView overlays]);
-#endif
 	}
 }
 

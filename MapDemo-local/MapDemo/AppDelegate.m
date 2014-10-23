@@ -6,7 +6,7 @@
 //
 //	This code is distributed under the terms of the MIT license.
 //
-//	Copyright (c) 2011-2014 Steve Caine.
+//	Copyright (c) 2014 Steve Caine.
 //
 
 #import "AppDelegate.h"
@@ -21,6 +21,8 @@
 	NSDate *now = [NSDate date];
 	MyLog(@"launched at %@ on %@", str_logTime(now), str_logDate(now));
 	MyLog(@"%@", str_device_OS_UDID());
+//	MyLog(@"app path = '%@'", str_AppPath());
+//	MyLog(@"doc path = '%@'", str_DocumentsPath());
 	MyLog(@"\n%s", __FUNCTION__);
 	
 	if(getenv( "NSDebugEnabled"))

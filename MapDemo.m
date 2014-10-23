@@ -54,12 +54,8 @@ static MapOverlayPathStyle *regionStyle() { // polygon
 - (id)initWithLocation:(CLLocation *)location {
 	self = [super initWithCoordinate:location.coordinate];
 	if (self) {
-//		self.title = [[UIDevice currentDevice] model];
-		CLLocationCoordinate2D c = location.coordinate;
-		NSString *str_latitude  = [NSString stringWithFormat:@"%3f %s", fabs(c.latitude),  (c.latitude  > 0 ? "N" : "S")];
-		NSString *str_longitude = [NSString stringWithFormat:@"%4f %s", fabs(c.longitude), (c.longitude > 0 ? "E" : "W")];
-//		self.subtitle = [NSString stringWithFormat:@"{ %@, %@ }", str_latitude, str_longitude];
-		self.subtitle = [NSString stringWithFormat:@"%@, %@", str_latitude, str_longitude];
+		// title set in class ctor
+		self.subtitle = [MapUtil locationString:location];
 		self.image = [UIImage imageNamed:@"UserDot.png"];
 		self.reuseID = @"MapUserPoint";
 	}

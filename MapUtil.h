@@ -86,6 +86,9 @@ NSArray *randomCoordsInRegion(MKCoordinateRegion region, NSUInteger count);
 
 @interface MapUtil : NSObject
 
++ (NSString *)locationString:(CLLocation *)location;
+
+
 + (MapAnnotation *)mapView:(MKMapView *)mapView addAnnotationForCoordinate:(CLLocationCoordinate2D)coord;
 
 + (NSArray *)mapView:(MKMapView *)mapView addAnnotationsForCoords:(NSArray *)values;

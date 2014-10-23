@@ -26,6 +26,10 @@
 	<true/>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>MapDemo needs access to your location while it’s running in order to demonstrate its code.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>MapDemo needs constant access to your location in order to demonstrate its code.</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>
