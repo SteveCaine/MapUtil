@@ -28,7 +28,11 @@
 //	Copyright (c) 2014 Steve Caine.
 //
 
-#define CONFIG_trackUserLocation	0	// NOT YET IMPLEMENTED
+// NOT YET IMPLEMENTED - MapUserTrail (which would track changing location)
+#define CONFIG_keepUpdatingLocation	1
+
+#define CONFIG_includeOurLocation	0	// show user location with our custom annotation
+#define CONFIG_includeUserLocation	1	// show standard iOS user location annotation
 
 #import <CoreLocation/CoreLocation.h>
 #import <MapKit/MapKit.h>
@@ -65,6 +69,7 @@
 
 @property (strong, nonatomic)			CLLocationManager	*locationManager;
 @property (strong, nonatomic)			MapAnnotation		*userAnnotation;
+@property (assign, nonatomic)			MKUserLocation		*userLocation;
 @property (assign, nonatomic)		CLAuthorizationStatus	lastStatus;
 
 @property (strong, nonatomic)			NSMutableArray		*dismissableAlerts;
@@ -176,6 +181,19 @@
 }
 
 // ----------------------------------------------------------------------
+// return lat/lon like this: "37.332331 N, 122.031219 W" (Apple Inc.'s location in iOS Simulator)
+- (NSString *)locationString:(CLLocation *)location {
+	NSString *result = nil;
+	if (location) {
+		CLLocationCoordinate2D c = location.coordinate;
+		NSString *str_latitude  = [NSString stringWithFormat:@"%3f %s", fabs(c.latitude),  (c.latitude  > 0 ? "N" : "S")];
+		NSString *str_longitude = [NSString stringWithFormat:@"%4f %s", fabs(c.longitude), (c.longitude > 0 ? "E" : "W")];
+		result = [NSString stringWithFormat:@"%@, %@", str_latitude, str_longitude];
+	}
+	return result;
+}
+
+// ----------------------------------------------------------------------
 
 - (void)openCallout:(id<MKAnnotation>)annotation {
 	[self.mapView selectAnnotation:annotation animated:YES];
@@ -185,7 +203,7 @@
 
 - (void)addUserAnnotation:(CLLocation *)location {
 	MyLog(@"%s current = %@", __FUNCTION__, self.userAnnotation);
-#if CONFIG_trackUserLocation
+#if CONFIG_keepUpdatingLocation
 	if (self.userAnnotation) {
 		[self.mapView removeAnnotation:self.userAnnotation];
 		self.userAnnotation = nil;
@@ -332,7 +350,7 @@
 	self.locationManager = [[CLLocationManager alloc] init];
 	self.locationManager.delegate = self;
 	self.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters;
-
+	
 	self.lastStatus = kCLAuthorizationStatusNotDetermined;
 	
 	self.dismissableAlerts = [NSMutableArray array];
@@ -404,22 +422,35 @@
 //	MyLog(@" location = %@", newLocation);
 	MyLog(@" location = %@ at %5.3f seconds ago", [MapUtil locationString:newLocation], age);
 	
-#if !CONFIG_trackUserLocation
+#if !CONFIG_keepUpdatingLocation
 	MyLog(@" call stopUpdatingLocation");
 	[manager stopUpdatingLocation];
 #endif
 	
-	MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(newLocation.coordinate, 2000, 2000);	// 2km x 2km
-//	MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(newLocation.coordinate, 200, 200);	// 200m x 200m
-	[self.mapView setRegion:region animated:YES];
-	
-	self.btnDemo1.enabled = YES;
-	self.btnDemo2.enabled = !self.userOverlaysPresent;
-	self.btnClear.enabled = ([self.mapView.annotations count] > 1 &&
-							 [self.mapView.overlays    count] > 0);
-	
-	// put annotation on user location
-	[self performSelector:@selector(addUserAnnotation:) withObject:newLocation afterDelay:2.0];
+	// first location received? zoom in and initialize our controls
+	if (self.userLocation == nil) {
+		MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(newLocation.coordinate, 2000, 2000);	// 2km x 2km
+//		MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(newLocation.coordinate, 200, 200);	// 200m x 200m
+		[self.mapView setRegion:region animated:YES];
+#if CONFIG_includeUserLocation
+		self.mapView.showsUserLocation = YES;
+#endif
+		self.btnDemo1.enabled = YES;
+		self.btnDemo2.enabled = !self.userOverlaysPresent;
+		self.btnClear.enabled = ([self.mapView.annotations count] > 1 &&
+								 [self.mapView.overlays    count] > 0);
+#if CONFIG_includeOurLocation
+		// put OUR annotation on user location
+		[self performSelector:@selector(addUserAnnotation:) withObject:newLocation afterDelay:2.0];
+#endif
+	}
+	else {
+#if CONFIG_includeUserLocation
+		// update subtitle on iOS user location annotation
+		self.userLocation.subtitle = [self locationString:self.userLocation.location];
+#endif
+	}
+	MyLog(@" span = %f, %f", self.mapView.region.span.latitudeDelta, self.mapView.region.span.longitudeDelta);
 }
 
 // ----------------------------------------------------------------------
@@ -515,8 +546,27 @@ didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
 	// OUR CUSTOM ANNOTATIONS
 	if ([annotation isKindOfClass:[MapAnnotation class]])
 		result = [(MapAnnotation*)annotation annotationView];
-	else if ([annotation isKindOfClass:[MKUserLocation class]])
-		result = nil;
+	
+	// STANDARD iOS USER LOCATION ANNOTATION
+	else if ([annotation isKindOfClass:[MKUserLocation class]]) {
+		result = nil; // iOS will provide the view object ...
+
+#if CONFIG_includeUserLocation
+		// ... but we can modify text of annotation
+		MKUserLocation *dot = (MKUserLocation *)annotation;
+		dot.title = @"You Are Here!";
+		dot.subtitle = [self locationString:dot.location];
+		
+		// if it's not already open, do so once things have settled down
+		if (self.userLocation == nil) {
+			self.userLocation = dot;
+#if !CONFIG_includeOurLocation
+			// but prefer selecting OUR annotation to the iOS annotation
+			[self performSelector:@selector(openCallout:) withObject:self.userLocation afterDelay:0.5];
+#endif
+		}
+#endif
+	}
 	else
 		// STANDARD ANNOTATIONS
 		result = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
