@@ -16,6 +16,8 @@
 #import "MapOverlays.h"
 #import "MapOverlays_private.h"
 
+#import "Categories.h"
+
 #import "Debug_iOS.h"
 #import "Debug_MapKit.h"
 
@@ -88,6 +90,74 @@ float randomFloatInRange(float a, float b) {
 	float diff = b - a;
 	float r = random * diff;
 	return a + r;
+}
+
+// ----------------------------------------------------------------------
+#pragma mark - MapBounds
+// ----------------------------------------------------------------------
+// disabled code in this block not (yet) used in this file (so gets "-Wunused-function" warning)
+// ----------------------------------------------------------------------
+// since longitude 'wraps' around at +/- 180 degrees (International Date Line)
+// we 'normalize' all values to positive numbers before making comparisons
+/*static CLLocationCoordinate2D normalizedCoordinate2D(CLLocationCoordinate2D coordinate) {
+	CLLocationCoordinate2D result = coordinate;
+	result.latitude  +=  90.0;
+	result.longitude += 180.0;
+	return result;
+}*/
+static CLLocationCoordinate2D denormalizedCoordinate2D(CLLocationCoordinate2D coordinate) {
+	CLLocationCoordinate2D result = coordinate;
+	result.latitude  -=  90.0;
+	result.longitude -= 180.0;
+	return result;
+}
+// ----------------------------------------------------------------------
+static MapBounds normalizedMapBounds(MapBounds bounds) {
+	MapBounds result = bounds;
+	result.south +=  90.0;
+	result.north +=  90.0;
+	result.west += 180.0;
+	result.east += 180.0;
+//	MyLog(@"%s %@ => %@", __FUNCTION__, str_MapBounds(bounds), str_MapBounds(result));
+	return result;
+}
+/*static MapBounds denormalizedMapBounds(MapBounds bounds) {
+	MapBounds result = bounds;
+	result.south -=  90.0;
+	result.north -=  90.0;
+	result.west -= 180.0;
+	result.east -= 180.0;
+//	MyLog(@"%s %@ => %@", __FUNCTION__, str_MapBounds(bounds), str_MapBounds(result));
+	return result;
+}*/
+// ----------------------------------------------------------------------
+
+CLLocationCoordinate2D MapBoundsCenter(MapBounds bounds) {
+//	MyLog(@"%s bounds => %@", __FUNCTION__, str_MapBounds(bounds));
+	MapBounds std_bounds = normalizedMapBounds(bounds);
+	CLLocationCoordinate2D center = {
+		std_bounds.south + ((std_bounds.north - std_bounds.south) / 2),
+		std_bounds.west + ((std_bounds.east - std_bounds.west) / 2) };
+	CLLocationCoordinate2D result = denormalizedCoordinate2D(center);
+//	MyLog(@" %@ => %@", str_CLLocationCoordinate2D(center), str_CLLocationCoordinate2D(result));
+	return result;
+}
+MKCoordinateSpan MapBoundsSpan(MapBounds bounds) {
+//	MyLog(@"%s bounds => %@", __FUNCTION__, str_MapBounds(bounds));
+	MapBounds std_bounds = normalizedMapBounds(bounds);
+	MKCoordinateSpan result = {
+		std_bounds.north - std_bounds.south,
+		std_bounds.east - std_bounds.west};
+//	MyLog(@" returns %@", str_MKCoordinateSpan(result));
+	return result;
+}
+MKCoordinateRegion MapBoundsRegion(MapBounds bounds) {
+//	MyLog(@"%s bounds => %@", __FUNCTION__, str_MapBounds(bounds));
+	CLLocationCoordinate2D center = MapBoundsCenter(bounds);
+	MKCoordinateSpan span = MapBoundsSpan(bounds);
+	MKCoordinateRegion result = MKCoordinateRegionMake(center, span);
+//	MyLog(@" returns %@", str_MKCoordinateRegion(result));
+	return result;
 }
 
 // ----------------------------------------------------------------------

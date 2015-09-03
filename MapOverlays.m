@@ -143,37 +143,25 @@
 	return self;
 }
 - (CLLocationCoordinate2D) coordinate {
-#ifdef DEBUG
-	NSException *exception = [NSException exceptionWithName:@"AbstractClassInstanceException" reason:@"Abstract class 'MapOverlay' should never be instantiated." userInfo:nil];
-	@throw exception;
-#endif
+	NSAssert(false, @"Abstract class 'MapOverlay' should never be instantiated.");
 	CLLocationCoordinate2D result = {0,0};
 	return result;
 }
 - (MKMapRect) boundingMapRect {
-#ifdef DEBUG
-	NSException *exception = [NSException exceptionWithName:@"AbstractClassInstanceException" reason:@"Abstract class 'MapOverlay' should never be instantiated." userInfo:nil];
-	@throw exception;
-#endif
+	NSAssert(false, @"Abstract class 'MapOverlay' should never be instantiated.");
 	MKMapRect result = {0,0,0,0};
 	return result;
 }
 // deprecated in iOS 7
 - (MKOverlayPathView *)overlayView {
 	MKOverlayPathView *result = nil;
-#ifdef DEBUG
-	NSException *exception = [NSException exceptionWithName:@"AbstractClassInstanceException" reason:@"Abstract class 'MapOverlay' should never be instantiated." userInfo:nil];
-	@throw exception;
-#endif
+	NSAssert(false, @"Abstract class 'MapOverlay' should never be instantiated.");
 	return result;
 }
 #ifdef __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer {
 	MKOverlayRenderer *result = nil;
-#ifdef DEBUG
-	NSException *exception = [NSException exceptionWithName:@"AbstractClassInstanceException" reason:@"Abstract class 'MapOverlay' should never be instantiated." userInfo:nil];
-	@throw exception;
-#endif
+	NSAssert(false, @"Abstract class 'MapOverlay' should never be instantiated.");
 	return result;
 }
 #endif
@@ -219,7 +207,7 @@
 	return self.circle.boundingMapRect;
 }
 
-// deprecated in iOS 7
+#ifndef __IPHONE_7_0 // deprecated in iOS 7
 - (MKOverlayPathView *)overlayView {
 	if (self.view == nil) {
 		self.view = [[MKCircleView alloc] initWithOverlay:self];
@@ -233,6 +221,7 @@
 	}
 	return self.view;
 }
+#endif
 
 #ifdef __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer {
@@ -342,7 +331,7 @@
 	[self.polygon getCoordinates:coords range:range];
 }
 
-// deprecated in iOS 7
+#ifndef __IPHONE_7_0 // deprecated in iOS 7
 - (MKOverlayPathView *)overlayView {
 	if (self.view == nil) {
 		self.view = [[MKPolygonView alloc] initWithOverlay:self];
@@ -356,6 +345,7 @@
 	}
 	return self.view;
 }
+#endif
 
 #ifdef __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer {
@@ -450,7 +440,7 @@
 	[self.polyline getCoordinates:coords range:range];
 }
 
-// deprecated in iOS 7
+#ifndef __IPHONE_7_0 // deprecated in iOS 7
 - (MKOverlayPathView *)overlayView {
 	if (self.view == nil) {
 		self.view = [[MKPolylineView alloc] initWithOverlay:self];
@@ -464,6 +454,7 @@
 	}
 	return self.view;
 }
+#endif
 
 #ifdef __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer {
@@ -533,7 +524,7 @@
 	return nil;
 }
 
-// deprecated in iOS 7
+#ifndef __IPHONE_7_0 // deprecated in iOS 7
 - (MKOverlayPathView *)overlayView {
 	if (self.view == nil) {
 		self.view = [[MKPolygonView alloc] initWithOverlay:self];
@@ -547,6 +538,7 @@
 	}
 	return self.view;
 }
+#endif
 
 #ifdef __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer {

@@ -20,6 +20,7 @@
 #import <MapKit/MapKit.h>
 #import <CoreLocation/CoreLocation.h>
 
+#import "MapBounds.h"
 
 // ----------------------------------------------------------------------
 #pragma mark   UTILITIES
@@ -28,6 +29,15 @@
 // just what it says
 float randomFloatInRange(float a, float b);
 
+// ----------------------------------------------------------------------
+
+CLLocationCoordinate2D	MapBoundsCenter(MapBounds bounds);
+MKCoordinateSpan		MapBoundsSpan(	MapBounds bounds);
+MKCoordinateRegion		MapBoundsRegion(MapBounds bounds);
+
+MapBounds MapBoundsForMKCoordinateRegion(MKCoordinateRegion region);
+
+// ----------------------------------------------------------------------
 // BOOL CLLocationCoordinate2DIsValid(CLLocationCoordinate2D coord); - is already in MapKit
 BOOL MKCoordinateSpanIsValid(MKCoordinateSpan span);
 BOOL MKCoordinateRegionIsValid(MKCoordinateRegion region);
@@ -87,7 +97,6 @@ NSArray *randomCoordsInRegion(MKCoordinateRegion region, NSUInteger count);
 @interface MapUtil : NSObject
 
 + (NSString *)locationString:(CLLocation *)location;
-
 
 + (MapAnnotation *)mapView:(MKMapView *)mapView addAnnotationForCoordinate:(CLLocationCoordinate2D)coord;
 
