@@ -34,6 +34,7 @@
 		8E4CBE5B19758D7C00C4A870 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E4CBE3D19758D7C00C4A870 /* UIKit.framework */; };
 		8E4CBE6319758D7C00C4A870 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8E4CBE6119758D7C00C4A870 /* InfoPlist.strings */; };
 		8E67AC961B98E476008E811E /* MapBounds.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E67AC951B98E476008E811E /* MapBounds.m */; };
+		8E930F3B1B9A2127006B0EC2 /* Categories.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E930F3A1B9A2127006B0EC2 /* Categories.m */; };
 		8EE3482719CCE077003E3CBD /* MapDemo.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EE3482619CCE077003E3CBD /* MapDemo.m */; };
 		8EE547611975A39F003602E1 /* Harvard Square.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8EE5475F1975A39F003602E1 /* Harvard Square.gpx */; };
 		8EE547621975A39F003602E1 /* White House.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8EE547601975A39F003602E1 /* White House.gpx */; };
@@ -94,6 +95,8 @@
 		8E4CBE6419758D7C00C4A870 /* MapDemoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MapDemoTests.m; sourceTree = "<group>"; };
 		8E67AC941B98E476008E811E /* MapBounds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MapBounds.h; path = ../DebugUtil/MapBounds.h; sourceTree = "<group>"; };
 		8E67AC951B98E476008E811E /* MapBounds.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MapBounds.m; path = ../DebugUtil/MapBounds.m; sourceTree = "<group>"; };
+		8E930F391B9A2127006B0EC2 /* Categories.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Categories.h; sourceTree = "<group>"; };
+		8E930F3A1B9A2127006B0EC2 /* Categories.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Categories.m; sourceTree = "<group>"; };
 		8EE3482519CCE077003E3CBD /* MapDemo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapDemo.h; sourceTree = "<group>"; };
 		8EE3482619CCE077003E3CBD /* MapDemo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MapDemo.m; sourceTree = "<group>"; };
 		8EE5475F1975A39F003602E1 /* Harvard Square.gpx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "Harvard Square.gpx"; sourceTree = "<group>"; };
@@ -215,6 +218,7 @@
 				8E4CBE4E19758D7C00C4A870 /* ViewController.h */,
 				8E4CBE4F19758D7C00C4A870 /* ViewController.m */,
 				8E4CBE5119758D7C00C4A870 /* Images.xcassets */,
+				8E930F381B9A2127006B0EC2 /* Categories */,
 				8E4256A319759A1800906920 /* Resources */,
 				8E4CBE4019758D7C00C4A870 /* Supporting Files */,
 			);
@@ -248,6 +252,15 @@
 				8E4CBE6119758D7C00C4A870 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		8E930F381B9A2127006B0EC2 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				8E930F391B9A2127006B0EC2 /* Categories.h */,
+				8E930F3A1B9A2127006B0EC2 /* Categories.m */,
+			);
+			path = Categories;
 			sourceTree = "<group>";
 		};
 		8EE5475E1975A39F003602E1 /* GPX */ = {
@@ -388,6 +401,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E930F3B1B9A2127006B0EC2 /* Categories.m in Sources */,
 				8E4256BB19759F5D00906920 /* MapUtil.m in Sources */,
 				8E4256AE19759C8C00906920 /* Debug_iOS.m in Sources */,
 				8E4256B219759D0500906920 /* MapOverlays.m in Sources */,
