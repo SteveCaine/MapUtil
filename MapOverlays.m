@@ -149,7 +149,7 @@
 }
 - (MKMapRect) boundingMapRect {
 	NSAssert(false, @"Abstract class 'MapOverlay' should never be instantiated.");
-	MKMapRect result = {0,0,0,0};
+	MKMapRect result = {{0,0},{0,0}};
 	return result;
 }
 // deprecated in iOS 7

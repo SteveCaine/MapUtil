@@ -332,7 +332,7 @@ MKCoordinateRegion regionForCoords(NSArray *values) {
 
 // same region but scaled larger/smaller
 MKCoordinateRegion regionForScaledCoords(NSArray *values, CGFloat scale) {
-	MKCoordinateRegion result = {0,0,0,0};
+	MKCoordinateRegion result = {{0,0},{0,0}};
 	
 	if ([values count]) {
 		CLLocationCoordinate2D *coords = NULL;
