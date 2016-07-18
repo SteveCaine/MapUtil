@@ -523,9 +523,9 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 		NSArray *values = randomCoordsInRegion(region, count);
 		// another way to extract CLLocationCoordinate2Ds from an array of NSValues
 		CLLocationCoordinate2D *coords = NULL;
-		NSUInteger count = coordsFromNSValues(&coords, values);
-		if (count) {
-			for (int index = 0; index < count; ++index) {
+		NSUInteger count2 = coordsFromNSValues(&coords, values);
+		if (count2) {
+			for (int index = 0; index < count2; ++index) {
 				CLLocationCoordinate2D coord = coords[index];
 				
 				MapAnnotation *point = [MapAnnotation pointWithCoordinate:coord];
