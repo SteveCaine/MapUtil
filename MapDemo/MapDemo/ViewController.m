@@ -467,7 +467,7 @@
 	}
 #ifdef DEBUG
 	else if (error.code == kCLErrorLocationUnknown &&
-			[[[UIDevice currentDevice] model] rangeOfString:@"Simulator"].location != NSNotFound) {
+			[[[UIDevice currentDevice] name] rangeOfString:@"Simulator"].location != NSNotFound) {
 		[self showAlertWithTitle:str_cantGetUserLocation message:str_simulateLocationError dismissable:NO];
 	}
 #endif
