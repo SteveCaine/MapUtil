@@ -23,19 +23,19 @@ static NSString *trailImage		= @"TrailDot";
 static NSString *regionImage	= @"RegionDot.png";
 
 static MapOverlayPathStyle *vicinityStyle() { // circle
-	MapOverlayPathStyle *result = [MapOverlayPathStyle styleWithLineWidth:2.0 color:[UIColor redColor] alpha:0.50];
+	MapOverlayPathStyle *result = [MapOverlayPathStyle styleWithLineWidth:2.0 color:UIColor.redColor alpha:0.50];
 	return result;
 }
 
 // TODO: still need to implement MapUserTrail overlay class
 //static MapOverlayPathStyle *trailStyle() { // polyline
-//	MapOverlayPathStyle *result = [MapOverlayPathStyle styleWithLineWidth:2.0 color:[UIColor blueColor]];
+//	MapOverlayPathStyle *result = [MapOverlayPathStyle styleWithLineWidth:2.0 color:UIColor.blueColor];
 //	return result;
 //}
 
 static MapOverlayPathStyle *regionStyle() { // polygon
-	MapOverlayPathStyle *result = [MapOverlayPathStyle styleWithLineWidth:2.0 color:[UIColor greenColor] alpha:0.25];
-//	MapOverlayPathStyle *result = [MapOverlayPathStyle styleWithLineWidth:8.0 strokeColor:[UIColor redColor] fillColor:nil];
+	MapOverlayPathStyle *result = [MapOverlayPathStyle styleWithLineWidth:2.0 color:UIColor.greenColor alpha:0.25];
+//	MapOverlayPathStyle *result = [MapOverlayPathStyle styleWithLineWidth:8.0 strokeColor:UIColor.redColor fillColor:nil];
 	return result;
 }
 
@@ -105,7 +105,7 @@ static MapOverlayPathStyle *regionStyle() { // polygon
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
 	if (self.locations == nil)
-		self.locations = [NSMutableArray arrayWithCapacity:[locations count]];
+		self.locations = [NSMutableArray arrayWithCapacity:locations.count];
 	[self.locations addObjectsFromArray:locations];
 	// TODO: and then ...?
 }
@@ -150,8 +150,8 @@ static MapOverlayPathStyle *regionStyle() { // polygon
 + (void)demoInMapView:(MKMapView *)mapView withLocation:(CLLocation *)location region:(MKCoordinateRegion)region {
 	if (mapView != nil && location != nil) {
 		
-//		MyLog(@"=> annotations = %@", [mapView annotations]);
-//		MyLog(@"=>	  overlays = %@", [mapView overlays]);
+//		MyLog(@"=> annotations = %@", mapView.annotations);
+//		MyLog(@"=>	  overlays = %@", mapView.overlays);
 
 		// moved this code to app's ViewController
 //		MapUserPoint *user = [MapUserPoint userWithLocation:location title:@"You Are Here!"];
@@ -181,8 +181,8 @@ static MapOverlayPathStyle *regionStyle() { // polygon
 			[mapView addAnnotation:pt];
 		}
 		
-//		MyLog(@"<= annotations = %@", [mapView annotations]);
-//		MyLog(@"<=	  overlays = %@", [mapView overlays]);
+//		MyLog(@"<= annotations = %@", mapView.annotations);
+//		MyLog(@"<=	  overlays = %@", mapView.overlays);
 	}
 }
 

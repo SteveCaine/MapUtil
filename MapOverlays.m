@@ -122,7 +122,7 @@
 }
 
 - (NSString *)description {
-	NSString *class = NSStringFromClass([self class]);
+	NSString *class = NSStringFromClass(self.class);
 	NSString *result = [NSString stringWithFormat:@"<%@: %p> - '%@'", class, self, self.title];
 //	NSString *result = [NSString stringWithFormat:@"<%@: %p> - '%@' ('%@')", class, self, self.title, self.subtitle];
 	return result;
@@ -265,7 +265,7 @@
 }
 
 -  (id)initWithCoords:(NSArray *)values style:(MapOverlayPathStyle *)style {
-//	MyLog(@"%s with %i coords (NSArray)", __FUNCTION__, [values count]);
+//	MyLog(@"%s with %i coords (NSArray)", __FUNCTION__, values.count);
 	self = [super initWithStyle:style];
 	if (self) {
 		CLLocationCoordinate2D *coords = NULL;
@@ -290,7 +290,7 @@
 
 // init method - polygon with holes
 - (id)initWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count interiorPolygons:(NSArray *)interiorPolygons style:(MapOverlayPathStyle *)style {
-//	MyLog(@"%s with %i coords (buffer) and %i holes", __FUNCTION__, count, [interiorPolygons count]);
+//	MyLog(@"%s with %i coords (buffer) and %i holes", __FUNCTION__, count, interiorPolygons.count);
 	self = [super initWithStyle:style];
 	if (self) {
 		_polygon = [MKPolygon polygonWithCoordinates:coords count:count interiorPolygons:interiorPolygons];
@@ -389,7 +389,7 @@
 
 // init methods
 -  (id)initWithCoords:(NSArray *)values style:(MapOverlayPathStyle *)style {
-//	MyLog(@"%s with %i coords (NSArray)", __FUNCTION__, [values count]);
+//	MyLog(@"%s with %i coords (NSArray)", __FUNCTION__, values.count);
 	self = [super initWithStyle:style];
 	if (self) {
 		CLLocationCoordinate2D *coords = NULL;
@@ -491,13 +491,13 @@
 	self = [super initWithCoordinates:corners count:4 interiorPolygons:nil style:style];
 	free(corners);
 	if (self) {
-//		MyLog(@"NEW <%@ %p>", NSStringFromClass([self class]), self);
+//		MyLog(@"NEW <%@ %p>", NSStringFromClass(self.class), self);
 	}
 	return self;
 }
 
 - (void) dealloc {
-//	MyLog(@"BYE <%@ %p>", NSStringFromClass([self class]), self);
+//	MyLog(@"BYE <%@ %p>", NSStringFromClass(self.class), self);
 }
 
 - (CLLocationCoordinate2D) coordinate {

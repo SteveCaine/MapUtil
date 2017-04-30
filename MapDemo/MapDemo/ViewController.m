@@ -34,6 +34,8 @@
 #define CONFIG_includeOurLocation	0	// show user location with our custom annotation
 #define CONFIG_includeUserLocation	1	// show standard iOS user location annotation
 
+// ----------------------------------------------------------------------
+
 #import <CoreLocation/CoreLocation.h>
 #import <MapKit/MapKit.h>
 
@@ -50,11 +52,18 @@
 #import "Debug_iOS.h"
 #import "Debug_MapKit.h"
 
+// ----------------------------------------------------------------------
+
 #define str_cantGetUserLocation		@"Can’t Get User Location"
 #define str_errorLoadingMap			@"Error loading map"
 
 #define str_accessDeniedError		@"Access Denied. Please go to\nSettings -> Privacy -> Location\nto allow access to Location Services."
 #define str_simulateLocationError	@"Did you forget to select a location\nin the Options panel\nof Xcode's Scheme Editor?"
+
+// ----------------------------------------------------------------------
+
+#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)	([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
+#define SYSTEM_VERSION_LESS_THAN(v)					([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
 
 // ----------------------------------------------------------------------
 //#pragma mark -
@@ -126,7 +135,7 @@
 // ----------------------------------------------------------------------
 
 - (IBAction)doClear:(id)sender {
-	MyLog(@"\nTapped button 'Clear' - Map has %i annotations and %i overlays.",
+	MyLog(@"\nTapped button 'Clear' - Map has %lu annotations and %lu overlays.",
 		  [self.mapView.annotations count], [self.mapView.overlays count]);
 	
 //	MyLog(@"=> annotations = %@", [self.mapView annotations]);
@@ -222,8 +231,8 @@
 - (void)postAlert:(UIAlertView *)alert {
 	static NSUInteger times;
 	// only show alert if app is active, else defer (so if access changes to authorized, we can cancel alert)
-	UIApplication *app = [UIApplication sharedApplication];
-	MyLog(@"%s %p (app is '%@') %i", __FUNCTION__, alert, str_AppState(app.applicationState), times++);
+	UIApplication *app = UIApplication.sharedApplication;
+	MyLog(@"%s %p (app is '%@') %lu", __FUNCTION__, alert, str_AppState(app.applicationState), times++);
 	if (app != nil && app.applicationState == UIApplicationStateActive)
 		[alert show];
 	else
@@ -233,7 +242,7 @@
 // ----------------------------------------------------------------------
 
 - (void)dismissAlerts {
-	MyLog(@"%s (%i)", __FUNCTION__, [self.dismissableAlerts count]);
+	MyLog(@"%s (%lu)", __FUNCTION__, [self.dismissableAlerts count]);
 	if ([self.dismissableAlerts count]) {
 		for (UIAlertView *alert in self.dismissableAlerts) {
 			MyLog(@" dismiss & cut %p", alert);
@@ -252,7 +261,7 @@
 	MyLog(@"%@ ALERT: '%@' - '%@'", prefix,
 		  [title   stringByReplacingOccurrencesOfString:@"\n" withString:@" "],
 		  [message stringByReplacingOccurrencesOfString:@"\n" withString:@" "]);
-	title = [title stringByAppendingString:[NSString stringWithFormat:@" (%i)", (int) ++self.alertsShown]];
+	title = [title stringByAppendingString:[NSString stringWithFormat:@" (%lu)", ++self.alertsShown]];
 #endif
 	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
 													message:message
@@ -274,7 +283,7 @@
 - (void)startTrackingLocation {
 	MyLog(@"\n%s", __FUNCTION__);
 #ifdef __IPHONE_8_0
-	CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
+	CLAuthorizationStatus status = CLLocationManager.authorizationStatus;
 	if (status == kCLAuthorizationStatusNotDetermined) {
 		if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0"))
 			[self.locationManager requestWhenInUseAuthorization];
@@ -353,10 +362,10 @@
 	
 	self.lastStatus = kCLAuthorizationStatusNotDetermined;
 	
-	self.dismissableAlerts = [NSMutableArray array];
+	self.dismissableAlerts = @[].mutableCopy;
 
 	// track changes in app state
-	NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+	NSNotificationCenter *nc = NSNotificationCenter.defaultCenter;
 	
 	[nc addObserver:self selector:@selector(notice_applicationDidBecomeActive)
 											name:UIApplicationDidBecomeActiveNotification object:nil];
@@ -399,7 +408,7 @@
 // ----------------------------------------------------------------------
 
 - (void)dealloc {
-	NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+	NSNotificationCenter *nc = NSNotificationCenter.defaultCenter;
 	[nc removeObserver:self]; // all notifications
 }
 
@@ -410,10 +419,10 @@
 - (void)locationManager:(CLLocationManager *)manager
 	 didUpdateLocations:(NSArray *)locations {
 
-	CLLocation *newLocation = [locations lastObject]; // objects in order received
+	CLLocation *newLocation = locations.lastObject; // objects in order received
 	NSTimeInterval age = -[newLocation.timestamp timeIntervalSinceNow];
 	
-	MyLog(@"%s with %i location(s) as of %5.3f seconds ago", __FUNCTION__, [locations count], age);
+	MyLog(@"%s with %lu location(s) as of %5.3f seconds ago", __FUNCTION__, locations.count, age);
 	
 	// ignore updates older than one minute (may be stale, cached data)
 	if ([newLocation.timestamp timeIntervalSinceReferenceDate] < [NSDate timeIntervalSinceReferenceDate] - 60)
@@ -456,7 +465,7 @@
 // ----------------------------------------------------------------------
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
-	NSLog(@"%s %@", __FUNCTION__, [error localizedDescription]);
+	NSLog(@"%s %@", __FUNCTION__, error.localizedDescription);
 	d_CLError(error.code, @" err = ");
 	MyLog(@" app is '%@', status is '%@'", str_curAppState(), str_curCLAuthorizationStatus());
 	
@@ -467,12 +476,12 @@
 	}
 #ifdef DEBUG
 	else if (error.code == kCLErrorLocationUnknown &&
-			[[[UIDevice currentDevice] name] rangeOfString:@"Simulator"].location != NSNotFound) {
+			[[UIDevice.currentDevice name] rangeOfString:@"Simulator"].location != NSNotFound) {
 		[self showAlertWithTitle:str_cantGetUserLocation message:str_simulateLocationError dismissable:NO];
 	}
 #endif
 	else
-		[self showAlertWithTitle:str_cantGetUserLocation message:[error localizedDescription] dismissable:NO];
+		[self showAlertWithTitle:str_cantGetUserLocation message:error.localizedDescription dismissable:NO];
 }
 
 // ----------------------------------------------------------------------
@@ -532,10 +541,10 @@ didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
 // ----------------------------------------------------------------------
 
 - (void)mapViewDidFailLoadingMap:(MKMapView *)aMapView withError:(NSError *)error {
-	NSLog(@"%s %@", __FUNCTION__, [error localizedDescription]);
+	NSLog(@"%s %@", __FUNCTION__, error.localizedDescription);
 	
 	// TODO: keep this? from older version
-	[self showAlertWithTitle:str_errorLoadingMap message:[error localizedDescription] dismissable:NO];
+	[self showAlertWithTitle:str_errorLoadingMap message:error.localizedDescription dismissable:NO];
 }
 
 // ----------------------------------------------------------------------
@@ -544,11 +553,11 @@ didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
 	MKAnnotationView *result = nil;
 	
 	// OUR CUSTOM ANNOTATIONS
-	if ([annotation isKindOfClass:[MapAnnotation class]])
+	if ([annotation isKindOfClass:MapAnnotation.class])
 		result = [(MapAnnotation*)annotation annotationView];
 	
 	// STANDARD iOS USER LOCATION ANNOTATION
-	else if ([annotation isKindOfClass:[MKUserLocation class]]) {
+	else if ([annotation isKindOfClass:MKUserLocation.class]) {
 		result = nil; // iOS will provide the view object ...
 
 #if CONFIG_includeUserLocation
@@ -582,17 +591,17 @@ didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
 	MKOverlayView *result = nil;
 	
 	// OUR CUSTOM OVERLAYS
-	if ([overlay isKindOfClass:[MapOverlay class]])
+	if ([overlay isKindOfClass:MapOverlay.class])
 		result = [(MapOverlay *)overlay overlayView];
 	
 	// STANDARD OVERLAYS
-	else if ([overlay isKindOfClass:[MKCircle class]])
+	else if ([overlay isKindOfClass:MKCircle.class])
 		result = [[MKCircleView alloc] initWithOverlay:overlay];
 	
-	else if ([overlay isKindOfClass:[MKPolygon class]])
+	else if ([overlay isKindOfClass:MKPolygon.class])
 		result = [[MKPolygonView alloc] initWithOverlay:overlay];
 	
-	else if ([overlay isKindOfClass:[MKPolyline class]])
+	else if ([overlay isKindOfClass:MKPolyline.class])
 		result = [[MKPolylineView alloc] initWithOverlay:overlay];
 
 //	MyLog(@"%s returns %@", __FUNCTION__, result);
@@ -607,17 +616,17 @@ didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
 	MKOverlayRenderer *result = nil;
 
 	// OUR CUSTOM OVERLAYS
-	if ([overlay isKindOfClass:[MapOverlay class]])
+	if ([overlay isKindOfClass:MapOverlay.class])
 		result = [(MapOverlay *)overlay overlayRenderer];
 	
 	// STANDARD OVERLAYS
-	else if ([overlay isKindOfClass:[MKCircle class]])
+	else if ([overlay isKindOfClass:MKCircle.class])
 		result = [[MKCircleRenderer alloc] initWithOverlay:overlay];
 	
-	else if ([overlay isKindOfClass:[MKPolygon class]])
+	else if ([overlay isKindOfClass:MKPolygon.class])
 		result = [[MKPolygonRenderer alloc] initWithOverlay:overlay];
 	
-	else if ([overlay isKindOfClass:[MKPolyline class]])
+	else if ([overlay isKindOfClass:MKPolyline.class])
 		result = [[MKPolylineRenderer alloc] initWithOverlay:overlay];
 
 //	MyLog(@"%s returns %@", __FUNCTION__, result);
@@ -630,8 +639,8 @@ didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
 // ----------------------------------------------------------------------
 
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
-	MyLog(@"%s %i", __FUNCTION__, buttonIndex);
-//	MyLog(@"%s (%i) %i", __FUNCTION__, self.alertsPending, buttonIndex);
+	MyLog(@"%s %lu", __FUNCTION__, buttonIndex);
+//	MyLog(@"%s (%lu) %lu", __FUNCTION__, self.alertsPending, buttonIndex);
 	if ([self.dismissableAlerts containsObject:alertView]) {
 		MyLog(@" => %@", self.dismissableAlerts);
 		[self.dismissableAlerts removeObject:alertView];

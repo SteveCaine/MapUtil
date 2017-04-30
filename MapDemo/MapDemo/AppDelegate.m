@@ -18,7 +18,7 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 #ifdef DEBUG
 	MyLog(@"*** %@ ***", str_AppName());
-	NSDate *now = [NSDate date];
+	NSDate *now = NSDate.date;
 	MyLog(@"launched at %@ on %@", str_logTime(now), str_logDate(now));
 	MyLog(@"%@", str_device_OS_UDID());
 //	MyLog(@"app path = '%@'", str_AppPath());

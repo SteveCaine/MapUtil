@@ -11,7 +11,7 @@
 //  Copyright (c) 2015 Steve Caine.
 //
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 // ----------------------------------------------------------------------
 

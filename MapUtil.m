@@ -38,8 +38,8 @@ static NSString *circleImage = @"red-16x16.png";
 static MapOverlayPathStyle *circleStyle() {
 	MapOverlayPathStyle *result = [[MapOverlayPathStyle alloc] init];
 	result.lineWidth = 3;
-	result.strokeColor =  [UIColor redColor];
-	result.fillColor   = [[UIColor redColor] colorWithAlphaComponent:0.25];
+	result.strokeColor =  UIColor.redColor;
+	result.fillColor   = [UIColor.redColor colorWithAlphaComponent:0.25];
 	return result;
 }
 
@@ -48,8 +48,8 @@ static NSString *polygonImage = @"blue-16x16.png";
 static MapOverlayPathStyle *polygonStyle() {
 	MapOverlayPathStyle *result = [[MapOverlayPathStyle alloc] init];
 	result.lineWidth = 4;
-	result.strokeColor =  [UIColor blueColor];
-	result.fillColor   = [[UIColor blueColor] colorWithAlphaComponent:0.25];
+	result.strokeColor =  UIColor.blueColor;
+	result.fillColor   = [UIColor.blueColor colorWithAlphaComponent:0.25];
 	return result;
 }
 
@@ -58,8 +58,8 @@ static NSString *polylineImage = @"green-16x16.png";
 static MapOverlayPathStyle *polylineStyle() {
 	MapOverlayPathStyle *result = [[MapOverlayPathStyle alloc] init];
 	result.lineWidth = 3;
-	result.strokeColor =  [UIColor greenColor];
-	result.fillColor   = [[UIColor greenColor] colorWithAlphaComponent:0.25];
+	result.strokeColor =  UIColor.greenColor;
+	result.fillColor   = [UIColor.greenColor colorWithAlphaComponent:0.25];
 	return result;
 }
 
@@ -68,8 +68,8 @@ static NSString *regionImage = @"yellow-16x16.png";
 static MapOverlayPathStyle *regionStyle() {
 	MapOverlayPathStyle *result = [[MapOverlayPathStyle alloc] init];
 	result.lineWidth = 3;
-	result.strokeColor =  [UIColor yellowColor];
-	result.fillColor   = [[UIColor yellowColor] colorWithAlphaComponent:0.25];
+	result.strokeColor =  UIColor.yellowColor;
+	result.fillColor   = [UIColor.yellowColor colorWithAlphaComponent:0.25];
 	return result;
 }
 
@@ -202,7 +202,7 @@ BOOL MKCoordinateRegionIsValid(MKCoordinateRegion region) {
 NSUInteger coordsFromNSValues(CLLocationCoordinate2D **outCoords, NSArray* inValues) {
 	NSUInteger result = 0;
 	
-	NSUInteger count = [inValues count];
+	NSUInteger count = inValues.count;
 	if (count && outCoords) {
 		size_t size = sizeof(CLLocationCoordinate2D) * count;
 //		*outCoords = malloc(size);
@@ -237,7 +237,7 @@ NSUInteger coordsFromNSValues(CLLocationCoordinate2D **outCoords, NSArray* inVal
 NSUInteger pointsFromNSValues(MKMapPoint **outPoints, NSArray* inValues) {
 	NSUInteger result = 0;
 	
-	NSUInteger count = [inValues count];
+	NSUInteger count = inValues.count;
 	if (count && outPoints) {
 		size_t size = sizeof(MKMapPoint) * count;
 //		*outPoints = malloc(size);
@@ -334,7 +334,7 @@ MKCoordinateRegion regionForCoords(NSArray *values) {
 MKCoordinateRegion regionForScaledCoords(NSArray *values, CGFloat scale) {
 	MKCoordinateRegion result = {{0,0},{0,0}};
 	
-	if ([values count]) {
+	if (values.count) {
 		CLLocationCoordinate2D *coords = NULL;
 		NSUInteger count = coordsFromNSValues(&coords, values);
 		
@@ -486,8 +486,8 @@ NSArray *randomCoordsInRegion(MKCoordinateRegion region, NSUInteger count) {
 addAnnotationsForCoords:(NSArray *)values {
 	NSMutableArray *result = nil;
 	
-	if (mapView != nil && [values count]) {
-		result = [NSMutableArray array];
+	if (mapView != nil && values.count) {
+		result = @[].mutableCopy;
 		NSString *imageFile = annotationImage;
 		if (imageFile == nil)
 			imageFile = pointImage;
@@ -519,7 +519,7 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 				 count:(NSUInteger) count {
 	NSMutableArray *result = nil;
 	if (mapView != nil && count) {
-		result = [NSMutableArray array];
+		result = @[].mutableCopy;
 		NSArray *values = randomCoordsInRegion(region, count);
 		// another way to extract CLLocationCoordinate2Ds from an array of NSValues
 		CLLocationCoordinate2D *coords = NULL;
@@ -565,9 +565,9 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 		// or create with input params
 		result = [MapOverlayCircle circleWithCenterCoordinate:center radius:radius style:style];
 #endif
-//		MyLog(@"=> overlays = %@", [mapView overlays]);
+//		MyLog(@"=> overlays = %@", mapView.overlays);
 		[mapView addOverlay:result];
-//		MyLog(@"<= overlays = %@", [mapView overlays]);
+//		MyLog(@"<= overlays = %@", mapView.overlays);
 	}
 	return result;
 }
@@ -576,7 +576,7 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 	addPolygonOverlayForCoords:(NSArray *)values {
 	MapOverlayPolygon *result = nil;
 	
-	if (mapView != nil && [values count]) {
+	if (mapView != nil && values.count) {
 		CLLocationCoordinate2D *coords = nil;
 		NSUInteger count = coordsFromNSValues(&coords, values);
 		if (count) {
@@ -600,7 +600,7 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 	addPolylineOverlayForCoords:(NSArray *)values {
 	MapOverlayPolyline *result = nil;
 	
-	if (mapView != nil && [values count]) {
+	if (mapView != nil && values.count) {
 		CLLocationCoordinate2D *coords = nil;
 		NSUInteger count = coordsFromNSValues(&coords, values);
 		if (count) {
@@ -651,9 +651,9 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 	
 	if (mapView != nil && MKCoordinateRegionIsValid(region)) {
 		// log current annotations/overlays (disabled)
-//		MyLog(@"=> annotations = %@", [mapView annotations]);
+//		MyLog(@"=> annotations = %@", mapView.annotations);
 //		d_Annotations(mapView, @"=> annotations = ");
-//		MyLog(@"=>	  overlays = %@", [mapView overlays]);
+//		MyLog(@"=>	  overlays = %@", mapView.overlays);
 		
 		// some random points for our poly overlays
 		NSArray *coords1 = randomCoordsInRegion(region, 10);
@@ -715,9 +715,9 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 		(void) [MapUtil mapView:mapView addPolygonOverlayForRegion:region scaled:0.75];
 		
 		// log updated annotations/overlays (disabled)
-//		MyLog(@"<= annotations = %@", [mapView annotations]);
+//		MyLog(@"<= annotations = %@", mapView.annotations);
 //		d_Annotations(mapView, @"<= annotations = ");
-//		MyLog(@"<=	  overlays = %@", [mapView overlays]);
+//		MyLog(@"<=	  overlays = %@", mapView.overlays);
 	}
 }
 
