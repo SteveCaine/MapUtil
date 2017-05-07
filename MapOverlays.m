@@ -265,7 +265,7 @@
 }
 
 -  (id)initWithCoords:(NSArray *)values style:(MapOverlayPathStyle *)style {
-//	MyLog(@"%s with %i coords (NSArray)", __FUNCTION__, values.count);
+//	MyLog(@"%s with %lu coords (NSArray)", __FUNCTION__, values.count);
 	self = [super initWithStyle:style];
 	if (self) {
 		CLLocationCoordinate2D *coords = NULL;
@@ -280,7 +280,7 @@
 
 // init method - simple polygon
 - (id)initWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count style:(MapOverlayPathStyle *)style {
-//	MyLog(@"%s with %i coords (buffer)", __FUNCTION__, count);
+//	MyLog(@"%s with %lu coords (buffer)", __FUNCTION__, count);
 	self = [super initWithStyle:style];
 	if (self) {
 		_polygon = [MKPolygon polygonWithCoordinates:coords count:count];
@@ -290,7 +290,7 @@
 
 // init method - polygon with holes
 - (id)initWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count interiorPolygons:(NSArray *)interiorPolygons style:(MapOverlayPathStyle *)style {
-//	MyLog(@"%s with %i coords (buffer) and %i holes", __FUNCTION__, count, interiorPolygons.count);
+//	MyLog(@"%s with %lu coords (buffer) and %lu holes", __FUNCTION__, count, interiorPolygons.count);
 	self = [super initWithStyle:style];
 	if (self) {
 		_polygon = [MKPolygon polygonWithCoordinates:coords count:count interiorPolygons:interiorPolygons];
@@ -389,7 +389,7 @@
 
 // init methods
 -  (id)initWithCoords:(NSArray *)values style:(MapOverlayPathStyle *)style {
-//	MyLog(@"%s with %i coords (NSArray)", __FUNCTION__, values.count);
+//	MyLog(@"%s with %lu coords (NSArray)", __FUNCTION__, values.count);
 	self = [super initWithStyle:style];
 	if (self) {
 		CLLocationCoordinate2D *coords = NULL;
@@ -403,7 +403,7 @@
 }
 
 - (id)initWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count style:(MapOverlayPathStyle *)style {
-//	MyLog(@"%s with %i coords (buffer)", __FUNCTION__, count);
+//	MyLog(@"%s with %lu coords (buffer)", __FUNCTION__, count);
 	self = [super initWithStyle:style];
 	if (self) {
 		_polyline = [MKPolyline polylineWithCoordinates:coords count:count];

@@ -26,9 +26,9 @@
 // ----------------------------------------------------------------------
 // some globals to define text & images for our test annotations and overlays
 
-static int		 annotationIndex = 0;
-static NSString *annotationImage;
-static NSString *annotationPrefix;
+static NSUInteger annotationIndex = 0;
+static NSString	 *annotationImage;
+static NSString  *annotationPrefix;
 
 // point
 static NSString *pointImage = @"cyan-16x16.png";
@@ -468,9 +468,9 @@ NSArray *randomCoordsInRegion(MKCoordinateRegion region, NSUInteger count) {
 		
 		result = [MapAnnotation pointWithCoordinate:coord];
 		if (annotationIndex == 0)
-			result.title = [NSString stringWithFormat:@"%@ point #%i", annotationPrefix, annotationIndex];
+			result.title = [NSString stringWithFormat:@"%@ point #%lu", annotationPrefix, annotationIndex];
 		else
-			result.title = [NSString stringWithFormat:@"%@ point #%i", annotationPrefix, annotationIndex];
+			result.title = [NSString stringWithFormat:@"%@ point #%lu", annotationPrefix, annotationIndex];
 		result.subtitle = @"This is here ... maybe";
 		result.reuseID = @"PointAnnotation";
 		result.image = [UIImage imageNamed:imageFile];
@@ -492,16 +492,16 @@ addAnnotationsForCoords:(NSArray *)values {
 		if (imageFile == nil)
 			imageFile = pointImage;
 		
-		int i = 0;
+		NSUInteger i = 0;
 		// one way to extract CLLocationCoordinate2Ds from an array of NSValues
 		for (NSValue *value in values) {
 			CLLocationCoordinate2D coord = [value MKCoordinateValue];
 			
 			MapAnnotation *point = [MapAnnotation pointWithCoordinate:coord];
 			if (i == 0)
-				point.title = [NSString stringWithFormat:@"%@ point #%i", annotationPrefix, i];
+				point.title = [NSString stringWithFormat:@"%@ point #%lu", annotationPrefix, i];
 			else
-				point.title = [NSString stringWithFormat:@"%@ point #%i", annotationPrefix, i];
+				point.title = [NSString stringWithFormat:@"%@ point #%lu", annotationPrefix, i];
 			++i;
 			point.subtitle = @"This is here ... maybe";
 			point.reuseID = @"CoordsAnnotation";
@@ -525,11 +525,11 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 		CLLocationCoordinate2D *coords = NULL;
 		NSUInteger count2 = coordsFromNSValues(&coords, values);
 		if (count2) {
-			for (int index = 0; index < count2; ++index) {
+			for (NSUInteger index = 0; index < count2; ++index) {
 				CLLocationCoordinate2D coord = coords[index];
 				
 				MapAnnotation *point = [MapAnnotation pointWithCoordinate:coord];
-				point.title = [NSString stringWithFormat:@"%@ point #%i", annotationPrefix, index];
+				point.title = [NSString stringWithFormat:@"%@ point #%lu", annotationPrefix, index];
 				if (index)
 					point.subtitle = @"You be here too, mon ...";
 				else
