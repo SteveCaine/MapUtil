@@ -40,6 +40,12 @@
 #import "Debug_MapKit.h"
 
 // ----------------------------------------------------------------------
+#if TARGET_IPHONE_SIMULATOR
+static BOOL const DeviceIsSimulator = YES;
+#else
+static BOOL const DeviceIsSimulator = NO;
+#endif
+// ----------------------------------------------------------------------
 
 static NSString * const ERR_cantGetUserLocation	=	@"Can’t Get User Location";
 static NSString * const ERR_errorLoadingMap		=	@"Error loading map";
@@ -439,8 +445,7 @@ static NSString * const ERR_simulateLocationError =
 			[self showAlertWithTitle:ERR_cantGetUserLocation message:ERR_accessDeniedError dismissable:YES];
 	}
 #ifdef DEBUG
-	else if (error.code == kCLErrorLocationUnknown &&
-			[[UIDevice.currentDevice name] rangeOfString:@"Simulator"].location != NSNotFound) {
+	else if (error.code == kCLErrorLocationUnknown && DeviceIsSimulator) {
 		[self showAlertWithTitle:ERR_cantGetUserLocation message:ERR_simulateLocationError dismissable:NO];
 	}
 #endif
