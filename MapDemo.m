@@ -6,7 +6,7 @@
 //
 //	This code is distributed under the terms of the MIT license.
 //
-//	Copyright (c) 2014 Steve Caine.
+//	Copyright (c) 2014-2017 Steve Caine.
 //
 
 #import "MapDemo.h"
@@ -124,9 +124,12 @@ static MapOverlayPathStyle *regionStyle() { // polygon
 }
 
 - (id)initWithMKRegion:(MKCoordinateRegion)region style:(MapOverlayPathStyle *)style {
-	CLLocationCoordinate2D *corners = regionCornersAsBuffer(region);
-	self = [super initWithCoordinates:corners count:4 style:style];
-	free(corners);
+	NSData *data = dataWithRegionCorners(region);
+	NSUInteger count;
+	const CLLocationCoordinate2D *corners = coordsFromNSData(data, &count);
+	
+	// Apple docs say "data in this array is copied" so we trust them and cast away 'const'
+	self = [super initWithCoordinates:(CLLocationCoordinate2D *)corners count:count style:style];
 	if (self) {
 	}
 	return self;

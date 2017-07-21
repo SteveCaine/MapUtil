@@ -1,7 +1,7 @@
 MapUtil
 =======
 
-This repository contains custom map annotation and map overlay classes for use in apps running iOS 6 and higher, including iOS 8, as well as utility code to simplify the use of these classes. These are contained in the files:
+This repository contains custom map annotation and map overlay classes for use in apps running iOS 8 and higher, as well as utility code to simplify the use of these classes. These are contained in the files:
 
 * MapOverlay.[h/m] - Classes implementing MKAnnotation and MKOverlay protocols for all subclasses of MKShape: points, circles, polygons, and polylines, as well as polygons based on MKRegions.
 
@@ -37,7 +37,9 @@ To use the demo:
 
 - Tapping the 'Clear' button will remove all but the "You Are Here!" annotation. 
 
+NOTE: Earlier versions of this code supported use in versions of iOS back to 6.1. That support has been removed in this 2017-07-20 update. See commits to this repository prior to that date for details.
+
 This code is distributed under the terms of the MIT license. See file "LICENSE" in this repository for details.
 
-Copyright (c) 2014 Steve Caine.<br>
+Copyright (c) 2014-2017 Steve Caine.<br>
 @SteveCaine on github.com

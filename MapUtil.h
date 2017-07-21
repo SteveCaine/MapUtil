@@ -10,7 +10,7 @@
 //
 //	This code is distributed under the terms of the MIT license.
 //
-//	Copyright (c) 2014 Steve Caine.
+//	Copyright (c) 2014-2017 Steve Caine.
 //
 
 #define CONFIG_useSuperclassCtors 1
@@ -44,22 +44,35 @@ BOOL MKCoordinateRegionIsValid(MKCoordinateRegion region);
 
 // ----------------------------------------------------------------------
 
-// extract map coords stored in array as NSValues
-// and store in buffer created with malloc()
-// caller must call free() on any non-nil buffer returned
-// (this just skips invalid coord values, paranoid callers can check return value against [inValues count])
-NSUInteger coordsFromNSValues(CLLocationCoordinate2D **outCoords, NSArray* inValues);
+// extract lat/lon pairs from array of NSValues (each encoding a single CLLocation2D)
+// and return an NSData with a flat array of the raw CLLocation2D coords
+// (this just skips invalid NSValues, paranoid callers can check return value against values.count)
+NSData *dataWithCoordsFromNSValues(NSArray *values);
+
+// extract lat/lon pairs from array of NSArrays (each a lat/lon pair of NSNumber* doubles)
+// and return an NSData with an array of the raw CLLocation2D coords
+// (this just skips invalid NSValues, paranoid callers can check return value against values.count)
+NSData *dataWithCoordsFromNSArray(NSArray *array);
+
+// returns (nil, 0) if data empty or length/sizeof(coord) has leftover bytes
+const CLLocationCoordinate2D *coordsFromNSData(NSData *data, NSUInteger *outLen);
+
+// ----------------------------------------------------------------------
 
 // extract map points stored in array as NSValues
-// and store in buffer created with malloc()
-// caller must call free() on any non-nil buffer returned
-// (this just skips invalid point values, paranoid callers can check return value against [inValues count])
-NSUInteger pointsFromNSValues(MKMapPoint **outPoints, NSArray* inValues);
+// and return an NSData with a flat array of the raw MKMapPoint points
+// (this just skips invalid NSValues values, paranoid callers can check return value against [inValues count])
+//NSUInteger pointsFromNSValues(MKMapPoint **outPoints, NSArray* inValues);
+NSData *dataWithMapPointsFromNSValues(NSArray *values);
 
-// calc four corners of a region and return in buffer created with malloc()
-// caller must call free() on any non-nil buffer returned
-// returns -NULL- if region is invalid
-CLLocationCoordinate2D* regionCornersAsBuffer(MKCoordinateRegion region);
+// returns (nil, 0) if data empty or length/sizeof(point) has leftover bytes
+const MKMapPoint *mapPointsFromNSData(NSData *data, NSUInteger *outLen);
+
+// ----------------------------------------------------------------------
+
+// calc four corners of a region and return an NSData with a flat array of the coords
+// returns -nil- if region is invalid
+NSData *dataWithRegionCorners(MKCoordinateRegion region);
 
 // calc four corners of a region and return as NSValues
 // returns -nil- if region is invalid

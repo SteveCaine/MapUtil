@@ -18,7 +18,7 @@
 //
 //	This code is distributed under the terms of the MIT license.
 //
-//	Copyright (c) 2014 Steve Caine.
+//	Copyright (c) 2014-2017 Steve Caine.
 //
 
 #import "MapOverlays.h"
@@ -51,10 +51,7 @@
 @interface MapOverlay ()
 
 @property (strong, nonatomic) MapOverlayPathStyle	*style;
-@property (strong, nonatomic) MKOverlayPathView		*view; // deprecated in iOS 7
-#ifdef __IPHONE_7_0
 @property (strong, nonatomic) MKOverlayPathRenderer	*renderer;
-#endif
 
 - (id)initWithStyle:(MapOverlayPathStyle *)style;
 
@@ -97,12 +94,19 @@
 										count:(NSUInteger)count
 										style:(MapOverlayPathStyle *)style;
 
++ (MapOverlayPolygon *)polygonWithCoordinates:(CLLocationCoordinate2D *)coords
+										count:(NSUInteger)count
+							 interiorPolygons:(NSArray *)interiorPolygons
+										style:(MapOverlayPathStyle *)style;
+
 - (id)initWithCoordinates:(CLLocationCoordinate2D *)coords
 					count:(NSUInteger)count
 					style:(MapOverlayPathStyle *)style;
 
 - (id)initWithPolygon:(MKPolygon *)polygon
 				style:(MapOverlayPathStyle *)style;
+
+- (id)initWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count interiorPolygons:(NSArray *)interiorPolygons style:(MapOverlayPathStyle *)style;
 
 @end
 

@@ -20,15 +20,14 @@
 //		@property radius
 //	is declared in MKCircle
 //
-//	NOTE: MapOverlayPathStyle implements just *some* of the properties
-//	common to both MKOverlayPathView and MKOverlayPathRenderer,
+//	NOTE: MapOverlayPathStyle implements just *some* properties of MKOverlayPathRenderer,
 //	remaining properties (lineCap, miterLimit, etc.) could be added as needed
 //
 //	Created by Steve Caine on 05/29/14.
 //
 //	This code is distributed under the terms of the MIT license.
 //
-//	Copyright (c) 2014 Steve Caine.
+//	Copyright (c) 2014-2017 Steve Caine.
 //
 
 #import <Foundation/Foundation.h>
@@ -80,12 +79,7 @@
 
 @interface MapOverlay : NSObject <MKOverlay>
 
-// deprecated in iOS 7
-- (MKOverlayView *)overlayView;
-
-#ifdef __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer;
-#endif
 
 @end
 
@@ -119,8 +113,8 @@
 + (MapOverlayRegion *)regionWithMKRegion:(MKCoordinateRegion)region
 								   style:(MapOverlayPathStyle *)style;
 
-//- (id)initWithMKRegion:(MKCoordinateRegion)region
-//				 style:(MapOverlayPathStyle *)style;
+- (id)initWithMKRegion:(MKCoordinateRegion)region
+				 style:(MapOverlayPathStyle *)style;
 
 @end
 

@@ -8,7 +8,7 @@
 //
 //	This code is distributed under the terms of the MIT license.
 //
-//	Copyright (c) 2014 Steve Caine.
+//	Copyright (c) 2014-2017 Steve Caine.
 //
 
 #import "MapOverlays.h"
@@ -152,19 +152,11 @@
 	MKMapRect result = {{0,0},{0,0}};
 	return result;
 }
-// deprecated in iOS 7
-- (MKOverlayPathView *)overlayView {
-	MKOverlayPathView *result = nil;
-	NSAssert(false, @"Abstract class 'MapOverlay' should never be instantiated.");
-	return result;
-}
-#ifdef __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer {
 	MKOverlayRenderer *result = nil;
 	NSAssert(false, @"Abstract class 'MapOverlay' should never be instantiated.");
 	return result;
 }
-#endif
 @end
 
 // ----------------------------------------------------------------------
@@ -207,23 +199,6 @@
 	return self.circle.boundingMapRect;
 }
 
-#ifndef __IPHONE_7_0 // deprecated in iOS 7
-- (MKOverlayPathView *)overlayView {
-	if (self.view == nil) {
-		self.view = [[MKCircleView alloc] initWithOverlay:self];
-		if (self.style) {
-			self.view.lineWidth	  = self.style.lineWidth;
-			self.view.strokeColor = self.style.strokeColor;
-			self.view.fillColor	  = self.style.fillColor;
-		}
-		else
-			NSLog(@"style == nil in %s", __FUNCTION__);
-	}
-	return self.view;
-}
-#endif
-
-#ifdef __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer {
 	if (self.renderer == nil) {
 		self.renderer = [[MKCircleRenderer alloc] initWithCircle:self.circle];
@@ -237,7 +212,6 @@
 	}
 	return self.renderer;
 }
-#endif
 
 @end
 
@@ -259,7 +233,10 @@
 }
 
 // class method - polygon with holes
-+ (MapOverlayPolygon *)polygonWithCoordinates:(CLLocationCoordinate2D *)coords count:(NSUInteger)count interiorPolygons:(NSArray *)interiorPolygons style:(MapOverlayPathStyle *)style {
++ (MapOverlayPolygon *)polygonWithCoordinates:(CLLocationCoordinate2D *)coords
+										count:(NSUInteger)count
+							 interiorPolygons:(NSArray *)interiorPolygons
+										style:(MapOverlayPathStyle *)style {
 	MapOverlayPolygon *result = [[MapOverlayPolygon alloc] initWithCoordinates:coords count:count interiorPolygons:interiorPolygons style:style];
 	return result;
 }
@@ -268,11 +245,12 @@
 //	MyLog(@"%s with %i coords (NSArray)", __FUNCTION__, values.count);
 	self = [super initWithStyle:style];
 	if (self) {
-		CLLocationCoordinate2D *coords = NULL;
-		NSUInteger count = coordsFromNSValues(&coords, values);
-		if (count) {
-			_polygon = [MKPolygon polygonWithCoordinates:coords count:count];
-			free(coords);
+		NSData *data = dataWithCoordsFromNSValues(values);
+		NSUInteger count;
+		const CLLocationCoordinate2D *coords = coordsFromNSData(data, &count);
+		if (coords && count) {
+			// Apple docs say "data in this array is copied" so we trust them and cast away 'const'
+			_polygon = [MKPolygon polygonWithCoordinates:(CLLocationCoordinate2D *)coords count:count];
 		}
 	}
 	return self;
@@ -331,23 +309,6 @@
 	[self.polygon getCoordinates:coords range:range];
 }
 
-#ifndef __IPHONE_7_0 // deprecated in iOS 7
-- (MKOverlayPathView *)overlayView {
-	if (self.view == nil) {
-		self.view = [[MKPolygonView alloc] initWithOverlay:self];
-		if (self.style) {
-			self.view.lineWidth	  = self.style.lineWidth;
-			self.view.strokeColor = self.style.strokeColor;
-			self.view.fillColor	  = self.style.fillColor;
-		}
-		else
-			NSLog(@"style == nil in %s", __FUNCTION__);
-	}
-	return self.view;
-}
-#endif
-
-#ifdef __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer {
 	if (self.renderer == nil) {
 		self.renderer = [[MKPolygonRenderer alloc] initWithPolygon:self.polygon];
@@ -361,7 +322,6 @@
 	}
 	return self.renderer;
 }
-#endif
 
 @end
 
@@ -392,11 +352,12 @@
 //	MyLog(@"%s with %i coords (NSArray)", __FUNCTION__, values.count);
 	self = [super initWithStyle:style];
 	if (self) {
-		CLLocationCoordinate2D *coords = NULL;
-		NSUInteger count = coordsFromNSValues(&coords, values);
-		if (count) {
-			_polyline = [MKPolyline polylineWithCoordinates:coords count:count];
-			free(coords);
+		NSData *data = dataWithCoordsFromNSValues(values);
+		NSUInteger count;
+		const CLLocationCoordinate2D *coords = coordsFromNSData(data, &count);
+		if (coords && count) {
+			// Apple docs say "data in this array is copied" so we trust them and cast away 'const'
+			_polyline = [MKPolyline polylineWithCoordinates:(CLLocationCoordinate2D *)coords count:count];
 		}
 	}
 	return self;
@@ -440,23 +401,6 @@
 	[self.polyline getCoordinates:coords range:range];
 }
 
-#ifndef __IPHONE_7_0 // deprecated in iOS 7
-- (MKOverlayPathView *)overlayView {
-	if (self.view == nil) {
-		self.view = [[MKPolylineView alloc] initWithOverlay:self];
-		if (self.style) {
-			self.view.lineWidth	  = self.style.lineWidth;
-			self.view.strokeColor = self.style.strokeColor;
-			self.view.fillColor	  = self.style.fillColor;
-		}
-		else
-			NSLog(@"style == nil in %s", __FUNCTION__);
-	}
-	return self.view;
-}
-#endif
-
-#ifdef __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer {
 	if (self.renderer == nil) {
 		self.renderer = [[MKPolylineRenderer alloc] initWithPolyline:self.polyline];
@@ -470,7 +414,6 @@
 	}
 	return self.renderer;
 }
-#endif
 
 @end
 
@@ -487,9 +430,11 @@
 
 - (id)initWithMKRegion:(MKCoordinateRegion)region style:(MapOverlayPathStyle *)style {
 //	MyLog(@"%s with %@", __FUNCTION__, str_MKCoordinateRegion(region));
-	CLLocationCoordinate2D *corners = regionCornersAsBuffer(region);
-	self = [super initWithCoordinates:corners count:4 interiorPolygons:nil style:style];
-	free(corners);
+	NSData *data = dataWithRegionCorners(region);
+	NSUInteger count;
+	const CLLocationCoordinate2D *corners = coordsFromNSData(data, &count);
+	// Apple docs say "data in this array is copied" so we trust them and cast away 'const'
+	self = [super initWithCoordinates:(CLLocationCoordinate2D *)corners count:count interiorPolygons:nil style:style];
 	if (self) {
 //		MyLog(@"NEW <%@ %p>", NSStringFromClass(self.class), self);
 	}
@@ -524,23 +469,6 @@
 	return nil;
 }
 
-#ifndef __IPHONE_7_0 // deprecated in iOS 7
-- (MKOverlayPathView *)overlayView {
-	if (self.view == nil) {
-		self.view = [[MKPolygonView alloc] initWithOverlay:self];
-		if (self.style) {
-			self.view.lineWidth	  = self.style.lineWidth;
-			self.view.strokeColor = self.style.strokeColor;
-			self.view.fillColor	  = self.style.fillColor;
-		}
-		else
-			NSLog(@"style == nil in %s", __FUNCTION__);
-	}
-	return self.view;
-}
-#endif
-
-#ifdef __IPHONE_7_0
 - (MKOverlayRenderer *)overlayRenderer {
 	if (self.renderer == nil) {
 		self.renderer = [[MKPolygonRenderer alloc] initWithPolygon:self.polygon];
@@ -554,7 +482,6 @@
 	}
 	return self.renderer;
 }
-#endif
 
 @end
 

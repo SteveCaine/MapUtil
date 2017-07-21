@@ -7,25 +7,12 @@
 //	   or via subclasses - 'Demo 2'
 //	that hide the base classes' implementation details
 //
-//	there are two ways that our custom overlay classes can be presented on the screen
-//	1 - MKOverlayView		iOS 4.0 and later, deprecated in iOS 7.0
-//	2 - MKOverlayRenderer	iOS 7.0 and later
-//	via the MKMapViewDelegate protocol's viewForOverlay and rendererForOverlay methods
-//
-//	this code supports iOS 6 and later, so it provides methods to return both
-//	where the latter is presented only if compiled in SDKs 7.0 and above and run in iOS 7 and above
-//
-//	iOS itself determines whether 'view' or 'renderer' is called based on which protocol methods the overlay objects implement
-//	so we don't need runtime checks there to see which iOS version is currently running
-//
-//	this code has been updated to work with the new iSO 8 logic for granting access to the user's location
-//	while still being compatible with running in iOS 7 (and even iOS 6)
-//
 //	Created by Steve Caine on 07/15/14.
+//	Updated by Steve Caine on 07/20/17 to remove support for iOS versions prior to 8.x
 //
 //	This code is distributed under the terms of the MIT license.
 //
-//	Copyright (c) 2014 Steve Caine.
+//	Copyright (c) 2014-2017 Steve Caine.
 //
 
 // NOT YET IMPLEMENTED - MapUserTrail (which would track changing location)
@@ -54,16 +41,13 @@
 
 // ----------------------------------------------------------------------
 
-#define str_cantGetUserLocation		@"Can’t Get User Location"
-#define str_errorLoadingMap			@"Error loading map"
+static NSString * const ERR_cantGetUserLocation	=	@"Can’t Get User Location";
+static NSString * const ERR_errorLoadingMap		=	@"Error loading map";
 
-#define str_accessDeniedError		@"Access Denied. Please go to\nSettings -> Privacy -> Location\nto allow access to Location Services."
-#define str_simulateLocationError	@"Did you forget to select a location\nin the Options panel\nof Xcode's Scheme Editor?"
-
-// ----------------------------------------------------------------------
-
-#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)	([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
-#define SYSTEM_VERSION_LESS_THAN(v)					([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
+static NSString * const ERR_accessDeniedError =
+	@"Access Denied. Please go to\nSettings -> Privacy -> Location\nto allow access to Location Services.";
+static NSString * const ERR_simulateLocationError =
+	@"Did you forget to select a location\nin the Options panel\nof Xcode's Scheme Editor?";
 
 // ----------------------------------------------------------------------
 //#pragma mark -
@@ -88,12 +72,6 @@
 @property (assign, nonatomic)			MKCoordinateRegion	initialRegion;
 @property (assign, nonatomic)			BOOL				userOverlaysPresent;
 
-- (IBAction)doDemo1;
-
-- (IBAction)doDemo2;
-
-- (IBAction)doClear:(id)sender;
-
 @end
 
 // ----------------------------------------------------------------------
@@ -114,7 +92,7 @@
 		self.btnClear.enabled = YES;
 	}
 	else // should not happen; button should be disabled
-		[self showAlertWithTitle:str_cantGetUserLocation message:str_accessDeniedError dismissable:NO];
+		[self showAlertWithTitle:ERR_cantGetUserLocation message:ERR_accessDeniedError dismissable:NO];
 }
 
 // ----------------------------------------------------------------------
@@ -129,7 +107,7 @@
 		self.btnClear.enabled = YES;
 	}
 	else // should not happen; button should be disabled
-		[self showAlertWithTitle:str_cantGetUserLocation message:str_accessDeniedError dismissable:NO];
+		[self showAlertWithTitle:ERR_cantGetUserLocation message:ERR_accessDeniedError dismissable:NO];
 }
 
 // ----------------------------------------------------------------------
@@ -282,21 +260,15 @@
 
 - (void)startTrackingLocation {
 	MyLog(@"\n%s", __FUNCTION__);
-#ifdef __IPHONE_8_0
+	
 	CLAuthorizationStatus status = CLLocationManager.authorizationStatus;
 	if (status == kCLAuthorizationStatusNotDetermined) {
-		if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0"))
-			[self.locationManager requestWhenInUseAuthorization];
-		else // compiled for iOS 8 but running on earlier iOS
-			[self.locationManager startUpdatingLocation];
+		[self.locationManager requestWhenInUseAuthorization];
 	}
 	else if (status == kCLAuthorizationStatusAuthorizedWhenInUse ||
 			 status == kCLAuthorizationStatusAuthorizedAlways) {
 		[self.locationManager startUpdatingLocation];
 	}
-#else
-	[self.locationManager startUpdatingLocation];
-#endif
 }
 
 // ----------------------------------------------------------------------
@@ -308,7 +280,7 @@
 	if ([self globalAccess] == NO || [self localAccess] == NO)
 		// only show if no previous alerts are pending
 		if (self.alertsPending <= 0)
-			[self showAlertWithTitle:str_cantGetUserLocation message:str_accessDeniedError dismissable:YES];
+			[self showAlertWithTitle:ERR_cantGetUserLocation message:ERR_accessDeniedError dismissable:YES];
 }
 
 - (void)notice_applicationWillResignActive {
@@ -333,14 +305,6 @@
 	[super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
 
-	if (SYSTEM_VERSION_LESS_THAN(@"7.0")) {
-		// hard to believe iOS 6 doesn't do something like this by default
-		UIColor *dimColor = [[self.btnDemo1 titleColorForState:UIControlStateNormal]  colorWithAlphaComponent:0.5];
-		[self.btnDemo1 setTitleColor:dimColor forState:UIControlStateDisabled];
-		[self.btnDemo2 setTitleColor:dimColor forState:UIControlStateDisabled];
-		[self.btnClear setTitleColor:dimColor forState:UIControlStateDisabled];
-	}
-	
 	// choose one
 	self.mapView.mapType = MKMapTypeStandard;
 //	self.mapView.mapType = MKMapTypeSatellite;
@@ -472,16 +436,16 @@
 	if (error.code == kCLErrorDenied) {
 		// only show if no previous alerts are pending
 		if (self.alertsPending <= 0)
-			[self showAlertWithTitle:str_cantGetUserLocation message:str_accessDeniedError dismissable:YES];
+			[self showAlertWithTitle:ERR_cantGetUserLocation message:ERR_accessDeniedError dismissable:YES];
 	}
 #ifdef DEBUG
 	else if (error.code == kCLErrorLocationUnknown &&
 			[[UIDevice.currentDevice name] rangeOfString:@"Simulator"].location != NSNotFound) {
-		[self showAlertWithTitle:str_cantGetUserLocation message:str_simulateLocationError dismissable:NO];
+		[self showAlertWithTitle:ERR_cantGetUserLocation message:ERR_simulateLocationError dismissable:NO];
 	}
 #endif
 	else
-		[self showAlertWithTitle:str_cantGetUserLocation message:error.localizedDescription dismissable:NO];
+		[self showAlertWithTitle:ERR_cantGetUserLocation message:error.localizedDescription dismissable:NO];
 }
 
 // ----------------------------------------------------------------------
@@ -499,31 +463,16 @@ didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
 			}
 			// only show if no previous alerts are pending
 			if (self.alertsPending <= 0)
-				[self showAlertWithTitle:str_cantGetUserLocation message:str_accessDeniedError dismissable:YES];
+				[self showAlertWithTitle:ERR_cantGetUserLocation message:ERR_accessDeniedError dismissable:YES];
 			break;
 
 		case kCLAuthorizationStatusNotDetermined:
-#ifdef __IPHONE_8_0
-			if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
-				MyLog(@" requesting access");
-				[self.locationManager requestWhenInUseAuthorization];
-			}
-			else { // compiled for iOS 8 but running on earlier iOS
-				NSLog(@" start tracking location");
-//				[self.locationManager startUpdatingLocation];
-				[self startTrackingLocation];
-			}
-#else
-			[self startTrackingLocation];
-#endif
+			MyLog(@" requesting access");
+			[self.locationManager requestWhenInUseAuthorization];
 			break;
 
-#ifdef __IPHONE_8_0
 		case kCLAuthorizationStatusAuthorizedAlways:
 		case kCLAuthorizationStatusAuthorizedWhenInUse:
-#else
-		case kCLAuthorizationStatusAuthorized:
-#endif
 			// cancel any 'access denied' alerts
 			[self dismissAlerts];
 			NSLog(@"Got authorization, start tracking location");
@@ -544,7 +493,7 @@ didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
 	NSLog(@"%s %@", __FUNCTION__, error.localizedDescription);
 	
 	// TODO: keep this? from older version
-	[self showAlertWithTitle:str_errorLoadingMap message:error.localizedDescription dismissable:NO];
+	[self showAlertWithTitle:ERR_errorLoadingMap message:error.localizedDescription dismissable:NO];
 }
 
 // ----------------------------------------------------------------------
@@ -586,32 +535,6 @@ didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
 
 // ----------------------------------------------------------------------
 
-// for iOS 6 and earlier
-- (MKOverlayView *)mapView:(MKMapView *)mapView viewForOverlay:(id <MKOverlay>)overlay {
-	MKOverlayView *result = nil;
-	
-	// OUR CUSTOM OVERLAYS
-	if ([overlay isKindOfClass:MapOverlay.class])
-		result = [(MapOverlay *)overlay overlayView];
-	
-	// STANDARD OVERLAYS
-	else if ([overlay isKindOfClass:MKCircle.class])
-		result = [[MKCircleView alloc] initWithOverlay:overlay];
-	
-	else if ([overlay isKindOfClass:MKPolygon.class])
-		result = [[MKPolygonView alloc] initWithOverlay:overlay];
-	
-	else if ([overlay isKindOfClass:MKPolyline.class])
-		result = [[MKPolylineView alloc] initWithOverlay:overlay];
-
-//	MyLog(@"%s returns %@", __FUNCTION__, result);
-	return result;
-}
-
-// ----------------------------------------------------------------------
-
-// for iOS 7 and later
-#ifdef __IPHONE_7_0
 - (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id <MKOverlay>)overlay {
 	MKOverlayRenderer *result = nil;
 
@@ -630,9 +553,13 @@ didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
 		result = [[MKPolylineRenderer alloc] initWithOverlay:overlay];
 
 //	MyLog(@"%s returns %@", __FUNCTION__, result);
+	
+	NSAssert(result != nil, @"Should never return nil. (says Apple)");
+	// per Mark Knopper comment in stackoverflow thread
+	//	http://stackoverflow.com/questions/30750560/swift-2-mkmapviewdelegate-rendererforoverlay-optionality
+	
 	return result;
 }
-#endif
 
 // ----------------------------------------------------------------------
 #pragma mark - UIAlertViewDelegate

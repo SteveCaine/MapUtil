@@ -8,8 +8,11 @@
 //
 //	This code is distributed under the terms of the MIT license.
 //
-//	Copyright (c) 2014 Steve Caine.
+//	Copyright (c) 2014-2017 Steve Caine.
 //
+
+// NOTE: Apple docs say all -polyXxxWithCoordinates methods COPY the input buffer's bytes,
+// so we trust them and cast away 'const' in each case
 
 #import "MapUtil.h"
 
@@ -197,123 +200,158 @@ BOOL MKCoordinateRegionIsValid(MKCoordinateRegion region) {
 #pragma mark -
 // ----------------------------------------------------------------------
 
-// caller must call free() on any non-nil buffer returned
-
-NSUInteger coordsFromNSValues(CLLocationCoordinate2D **outCoords, NSArray* inValues) {
-	NSUInteger result = 0;
-	
-	NSUInteger count = inValues.count;
-	if (count && outCoords) {
-		size_t size = sizeof(CLLocationCoordinate2D) * count;
-//		*outCoords = malloc(size);
-		*outCoords = calloc(count, size);
-		CLLocationCoordinate2D *c = *outCoords;
+// expected input is an array of NSValues, each encoding a single CLLocationCoordinate2D
+NSData *dataWithCoordsFromNSValues(NSArray *values) {
+	if (values.count) {
+		NSMutableData *data = [NSMutableData data];
 		
-		for (NSValue *value in inValues) {
-			if (strcmp([value objCType], @encode(CLLocationCoordinate2D)) == 0) {
+		for (id obj in values) {
+			NSValue *value = [NSValue cast:obj];
+			if (value && strcmp([value objCType], @encode(CLLocationCoordinate2D)) == 0) {
 				CLLocationCoordinate2D coord;
 				[value getValue:&coord];
-				*c++ = coord;
+				[data appendBytes:&coord length:sizeof(coord)];
 			}
 		}
-		result = c - *outCoords; // how many values *were* CLLocationCoordinate2Ds?
+		if (data.length)
+			return data.copy;
+	}
+	return nil;
+}
+
+// expected input is an array of arrays, where each inner array is a single lat/lon pair as NSNumber* doubles
+// i.e., @[ @[ @(41.723),@(-70.368) ], ... ]
+NSData *dataWithCoordsFromNSArray(NSArray *array) {
+	if (array.count) {
+		NSMutableData *data = [NSMutableData data];
 		
-		if (result < count) {
-			size_t new_size = sizeof(CLLocationCoordinate2D) * result;
-			if (new_size)
-				*outCoords = realloc(*outCoords, new_size);
-			else {
-				free(*outCoords);
-				*outCoords = NULL;
+		for (id obj in array) {
+			// only process expected lat/lon pairs
+			NSArray *lat_lon = [NSArray cast:obj];
+			if (lat_lon.count == 2) {
+				
+				NSNumber *lat = [NSNumber cast:lat_lon.firstObject];
+				NSNumber *lon = [NSNumber cast:lat_lon.lastObject];
+				
+				if (lat && lon) {
+					CLLocationCoordinate2D coord = CLLocationCoordinate2DMake(lat.doubleValue, lon.doubleValue);
+					[data appendBytes:&coord length:sizeof(coord)];
+				}
 			}
+		}
+		if (data.length)
+			return data.copy;
+	}
+	return nil;
+}
+
+// ASSUMED: -data- contains flat array of CLLocationCoordinate2D structs;
+const CLLocationCoordinate2D *coordsFromNSData(NSData *data, NSUInteger *outLen) {
+	if (outLen) *outLen = 0;
+	if (data.length) {
+		// our only attempt at validation - is length/size an integer?
+		if (data.length % sizeof(CLLocationCoordinate2D) == 0) {
+			if (outLen)
+				*outLen = data.length / sizeof(CLLocationCoordinate2D);
+			return (const CLLocationCoordinate2D *)data.bytes;
 		}
 	}
-	return result;
+	return NULL;
 }
 
 // ----------------------------------------------------------------------
-// caller must call free() on any non-nil buffer returned
 
-NSUInteger pointsFromNSValues(MKMapPoint **outPoints, NSArray* inValues) {
-	NSUInteger result = 0;
-	
-	NSUInteger count = inValues.count;
-	if (count && outPoints) {
-		size_t size = sizeof(MKMapPoint) * count;
-//		*outPoints = malloc(size);
-		*outPoints = calloc(count, size);
-		MKMapPoint *p = *outPoints;
+// expected input is an array of NSValues, each encoding a single MKMapPoint
+NSData *dataWithMapPointsFromNSValues(NSArray *values) {
+	if (values.count) {
+		NSMutableData *data = [NSMutableData data];
 		
-		for (NSValue *value in inValues) {
-			if (strcmp([value objCType], @encode(MKMapPoint)) == 0) {
+		for (id obj in values) {
+			NSValue *value = [NSValue cast:obj];
+			if (value && strcmp([value objCType], @encode(MKMapPoint)) == 0) {
 				MKMapPoint point;
 				[value getValue:&point];
-				*p++ = point;
+				[data appendBytes:&point length:sizeof(point)];
 			}
 		}
-		result = p - *outPoints; // how many values *were* MKMapPoints?
-		
-		if (result < count) {
-			size_t new_size = sizeof(MKMapPoint) * result;
-			if (new_size)
-				*outPoints = realloc(*outPoints, sizeof(MKMapPoint) * result);
-			else {
-				free(*outPoints);
-				*outPoints = NULL;
-			}
+		return (data.length ? data.copy : nil);
+	}
+	return nil;
+}
+
+// ASSUMED: -data- contains flat array of MKMapPoint structs;
+const MKMapPoint *mapPointsFromNSData(NSData *data, NSUInteger *outLen) {
+	if (outLen) *outLen = 0;
+	if (data.length) {
+		// our only attempt at validation - is length/size an integer?
+		if (data.length % sizeof(MKMapPoint) == 0) {
+			if (outLen)
+				*outLen = data.length / sizeof(MKMapPoint);
+			return (const MKMapPoint *)data.bytes;
 		}
 	}
-	return result;
+	return NULL;
 }
 
 // ----------------------------------------------------------------------
-// caller must call free() on any non-nil buffer returned
 
-CLLocationCoordinate2D* regionCornersAsBuffer(MKCoordinateRegion region) {
-	CLLocationCoordinate2D *result = NULL;
+NSData *dataWithRegionCorners(MKCoordinateRegion region) {
 	if (MKCoordinateRegionIsValid(region)) {
-		result = malloc(sizeof(CLLocationCoordinate2D) * 4);
+		NSMutableData *data = [NSMutableData data];
+		
 		CLLocationCoordinate2D center = region.center;
 		MKCoordinateSpan		 span = region.span;
-		result[0] = CLLocationCoordinate2DMake(center.latitude	+ span.latitudeDelta  / 2,
-											   center.longitude - span.longitudeDelta / 2); // top left
-		result[1] = CLLocationCoordinate2DMake(center.latitude	+ span.latitudeDelta  / 2,
-											   center.longitude + span.longitudeDelta / 2); // top right;
-		result[2] = CLLocationCoordinate2DMake(center.latitude	- span.latitudeDelta  / 2,
-											   center.longitude + span.longitudeDelta / 2); // bottom right;
-		result[3] = CLLocationCoordinate2DMake(center.latitude	- span.latitudeDelta  / 2,
-											   center.longitude - span.longitudeDelta / 2); // bottom left;
+		
+		CLLocationCoordinate2D coord;
+		coord = CLLocationCoordinate2DMake(center.latitude	+ span.latitudeDelta  / 2,
+										   center.longitude - span.longitudeDelta / 2); // top left
+		[data appendBytes:&coord length:sizeof(coord)];
+		
+		coord = CLLocationCoordinate2DMake(center.latitude	+ span.latitudeDelta  / 2,
+										   center.longitude + span.longitudeDelta / 2); // top right;
+		[data appendBytes:&coord length:sizeof(coord)];
+		
+		coord = CLLocationCoordinate2DMake(center.latitude	- span.latitudeDelta  / 2,
+										   center.longitude + span.longitudeDelta / 2); // bottom right;
+		[data appendBytes:&coord length:sizeof(coord)];
+		
+		coord = CLLocationCoordinate2DMake(center.latitude	- span.latitudeDelta  / 2,
+										   center.longitude - span.longitudeDelta / 2); // bottom left;
+		[data appendBytes:&coord length:sizeof(coord)];
+		
+		return data.copy; // corners in clockwise order
 	}
-	return result;
+	return nil;
 }
 
 // ----------------------------------------------------------------------
 
 NSArray *regionCornersAsNSValues(MKCoordinateRegion region) {
-	NSMutableArray *result = nil;
-	CLLocationCoordinate2D* coords = regionCornersAsBuffer(region);
-	if (coords) {
-		NSUInteger count = 4;
-		result = [NSMutableArray arrayWithCapacity:count];
-		for (NSUInteger i = 0; i < count; ++i) {
-			NSValue *value = [NSValue valueWithMKCoordinate:coords[i]];
-			[result addObject:value];
-		}
-		free(coords);
+	NSMutableArray *result = @[].mutableCopy;
+	
+	NSData *data = dataWithRegionCorners(region);
+	NSUInteger count;
+	const CLLocationCoordinate2D *coords = coordsFromNSData(data, &count);
+	const CLLocationCoordinate2D *end = coords + count;
+	
+	while (coords < end) {
+		NSValue *value = [NSValue valueWithMKCoordinate:*coords++];
+		[result addObject:value];
 	}
-	return result;
+
+	return (result.count ? result : nil);
 }
 // ----------------------------------------------------------------------
 
 MKCoordinateRegion scaledRegion(MKCoordinateRegion region, CGFloat scale) {
 	MKCoordinateRegion result = region;
-	if (scale > 0) {
+	if (scale > 0.0) {
 		result.span.latitudeDelta  *= scale;
 		result.span.longitudeDelta *= scale;
 	}
-	if (scale > 1) {
+	if (scale > 1.0) {
 		if (!MKCoordinateRegionIsValid(result)) {
-			// return invalid region to signal failure
+			// return empty region to signal failure
 			result = MKCoordinateRegionMake(CLLocationCoordinate2DMake(0, 0),
 											MKCoordinateSpanMake(0, 0));
 		}
@@ -327,7 +365,7 @@ MKCoordinateRegion scaledRegion(MKCoordinateRegion region, CGFloat scale) {
 
 // smallest region that encloses these points
 MKCoordinateRegion regionForCoords(NSArray *values) {
-	return regionForScaledCoords(values, 0); // '0' says "don't scale"
+	return regionForScaledCoords(values, 0.0); // '0' says "don't scale"
 }
 
 // same region but scaled larger/smaller
@@ -335,16 +373,21 @@ MKCoordinateRegion regionForScaledCoords(NSArray *values, CGFloat scale) {
 	MKCoordinateRegion result = {{0,0},{0,0}};
 	
 	if (values.count) {
-		CLLocationCoordinate2D *coords = NULL;
-		NSUInteger count = coordsFromNSValues(&coords, values);
+		// convert array to buffer
+		NSData *data = dataWithCoordsFromNSValues(values);
 		
+		NSUInteger count;
+		const CLLocationCoordinate2D *coords = coordsFromNSData(data, &count);
+		const CLLocationCoordinate2D *end = coords + count;
+
 		if (count) {
+			// validate coordinates
 			CLLocationDegrees minLat = +90, minLon = +180;
 			CLLocationDegrees maxLat = -90, maxLon = -180;
 			
 			BOOL invalid = NO;
-			for (NSUInteger index = 0; index < count; ++index) {
-				CLLocationCoordinate2D coord = coords[index];
+			while (coords < end && !invalid) {
+				CLLocationCoordinate2D coord = *coords++;
 				if (CLLocationCoordinate2DIsValid(coord)) {
 					minLat = MIN(minLat, coord.latitude);
 					minLon = MIN(minLon, coord.longitude);
@@ -354,9 +397,9 @@ MKCoordinateRegion regionForScaledCoords(NSArray *values, CGFloat scale) {
 				else
 					invalid = YES;
 			}
-			free(coords);
-			
+
 			if (!invalid) {
+				// create region
 				MKCoordinateSpan span = MKCoordinateSpanMake(maxLat - minLat, maxLon - minLon);
 				
 				CLLocationCoordinate2D center =
@@ -378,11 +421,13 @@ MKCoordinateRegion regionForScaledCoords(NSArray *values, CGFloat scale) {
 
 MKPolyline *polylineForCoords(NSArray *values) {
 	MKPolyline *result = nil;
-	CLLocationCoordinate2D *coords = NULL;
-	NSUInteger count = coordsFromNSValues(&coords, values);
+	
+	NSData *data = dataWithCoordsFromNSValues(values);
+	NSUInteger count;
+	const CLLocationCoordinate2D *coords = coordsFromNSData(data, &count);
 	if (count) {
-		result = [MKPolyline polylineWithCoordinates:coords count:count];
-		free(coords);
+		// cast away 'const' (see note above)
+		result = [MKPolyline polylineWithCoordinates:(CLLocationCoordinate2D *)coords count:count];
 	}
 	return result;
 }
@@ -391,11 +436,13 @@ MKPolyline *polylineForCoords(NSArray *values) {
 
 MKPolygon *polygonForCoords(NSArray *values) {
 	MKPolygon *result = nil;
-	CLLocationCoordinate2D *coords = NULL;
-	NSUInteger count = coordsFromNSValues(&coords, values);
+
+	NSData *data = dataWithCoordsFromNSValues(values);
+	NSUInteger count;
+	const CLLocationCoordinate2D *coords = coordsFromNSData(data, &count);
 	if (count) {
-		result = [MKPolygon polygonWithCoordinates:coords count:count];
-		free(coords);
+		// cast away 'const' (see note above)
+		result = [MKPolygon polygonWithCoordinates:(CLLocationCoordinate2D *)coords count:count];
 	}
 	return result;
 }
@@ -404,11 +451,16 @@ MKPolygon *polygonForCoords(NSArray *values) {
 
 MKPolygon *polygonForCoordsWithHoles(NSArray *values, NSArray *interiorPolygons) {
 	MKPolygon *result = nil;
-	CLLocationCoordinate2D *coords = NULL;
-	NSUInteger count = coordsFromNSValues(&coords, values);
+
+	NSData *data = dataWithCoordsFromNSValues(values);
+	NSUInteger count;
+	const CLLocationCoordinate2D *coords = coordsFromNSData(data, &count);
 	if (count) {
-		result = [MKPolygon polygonWithCoordinates:coords count:count interiorPolygons:interiorPolygons];
-		free(coords);
+		// cast away 'const' (see note above)
+		result = [MKPolygon polygonWithCoordinates:(CLLocationCoordinate2D *)coords
+											 count:count
+								  interiorPolygons:interiorPolygons];
+		// 'interior' param, if not empty, is array of MKPolygons
 	}
 	return result;
 }
@@ -487,7 +539,7 @@ addAnnotationsForCoords:(NSArray *)values {
 	NSMutableArray *result = nil;
 	
 	if (mapView != nil && values.count) {
-		result = @[].mutableCopy;
+		result = [NSMutableArray array];
 		NSString *imageFile = annotationImage;
 		if (imageFile == nil)
 			imageFile = pointImage;
@@ -516,20 +568,24 @@ addAnnotationsForCoords:(NSArray *)values {
 
 + (NSArray *)  mapView:(MKMapView *)mapView
 addAnnotationsInRegion:(MKCoordinateRegion)region
-				 count:(NSUInteger) count {
-	NSMutableArray *result = nil;
-	if (mapView != nil && count) {
-		result = @[].mutableCopy;
+				 count:(NSUInteger)count {
+	NSMutableArray *result = [NSMutableArray array];
+	
+	if (mapView && count) {
 		NSArray *values = randomCoordsInRegion(region, count);
-		// another way to extract CLLocationCoordinate2Ds from an array of NSValues
-		CLLocationCoordinate2D *coords = NULL;
-		NSUInteger count2 = coordsFromNSValues(&coords, values);
-		if (count2) {
-			for (int index = 0; index < count2; ++index) {
-				CLLocationCoordinate2D coord = coords[index];
+		
+		NSData *data = dataWithCoordsFromNSValues(values);
+		const CLLocationCoordinate2D *coords = coordsFromNSData(data, nil);
+		
+		if (coords) {
+			NSUInteger index = 0;
+			const CLLocationCoordinate2D *end = coords + values.count;
+			
+			while (coords < end) {
+				CLLocationCoordinate2D coord = *coords++;
 				
 				MapAnnotation *point = [MapAnnotation pointWithCoordinate:coord];
-				point.title = [NSString stringWithFormat:@"%@ point #%i", annotationPrefix, index];
+				point.title = [NSString stringWithFormat:@"%@ point #%lu", annotationPrefix, index];
 				if (index)
 					point.subtitle = @"You be here too, mon ...";
 				else
@@ -540,10 +596,9 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 				[result addObject:point];
 				[mapView addAnnotation:point];
 			}
-			free(coords);
 		}
 	}
-	return result;
+	return (result.count ? result.copy : nil);
 }
 
 // ----------------------------------------------------------------------
@@ -576,20 +631,21 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 	addPolygonOverlayForCoords:(NSArray *)values {
 	MapOverlayPolygon *result = nil;
 	
-	if (mapView != nil && values.count) {
-		CLLocationCoordinate2D *coords = nil;
-		NSUInteger count = coordsFromNSValues(&coords, values);
+	if (mapView && values.count) {
+		NSData *data = dataWithCoordsFromNSValues(values);
+		NSUInteger count;
+		const CLLocationCoordinate2D *coords = coordsFromNSData(data, &count);
 		if (count) {
 			
+			// both cast away 'const' (see note above)
 #if CONFIG_useSuperclassCtors
 			// either create with MKPolygon
-			MKPolygon *poly = [MKPolygon polygonWithCoordinates:coords count:count];
+			MKPolygon *poly = [MKPolygon polygonWithCoordinates:(CLLocationCoordinate2D *)coords count:count];
 			result = [[MapOverlayPolygon alloc] initWithPolygon:poly style:polygonStyle()];
 #else
 			// or create with input params
-			result = [MapOverlayPolygon polygonWithCoordinates:coords count:count style:style];
+			result = [MapOverlayPolygon polygonWithCoordinates:(CLLocationCoordinate2D *)coords count:count style:style];
 #endif
-			free(coords);
 			[mapView addOverlay:result];
 		}
 	}
@@ -601,19 +657,20 @@ addAnnotationsInRegion:(MKCoordinateRegion)region
 	MapOverlayPolyline *result = nil;
 	
 	if (mapView != nil && values.count) {
-		CLLocationCoordinate2D *coords = nil;
-		NSUInteger count = coordsFromNSValues(&coords, values);
+		NSData *data = dataWithCoordsFromNSValues(values);
+		NSUInteger count;
+		const CLLocationCoordinate2D *coords = coordsFromNSData(data, &count);
 		if (count) {
 			
+			// both cast away 'const' (see note above)
 #if CONFIG_useSuperclassCtors
 			// either create with MKPolyline
-			MKPolyline *poly = [MKPolyline polylineWithCoordinates:coords count:count];
+			MKPolyline *poly = [MKPolyline polylineWithCoordinates:(CLLocationCoordinate2D *)coords count:count];
 			result = [[MapOverlayPolyline alloc] initWithPolyline:poly style:polylineStyle()];
 #else
 			// or create with input params
-			result = [MapOverlayPolyline polylineWithCoordinates:coords count:count style:style];
+			result = [MapOverlayPolyline polylineWithCoordinates:(CLLocationCoordinate2D *)coords count:count style:style];
 #endif
-			free(coords);
 			[mapView addOverlay:result];
 		}
 	}
