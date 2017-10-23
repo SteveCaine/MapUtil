@@ -15,11 +15,14 @@
 //	Copyright (c) 2014-2017 Steve Caine.
 //
 
-// NOT YET IMPLEMENTED - MapUserTrail (which would track changing location)
-#define CONFIG_keepUpdatingLocation	1
+#define CONFIG_keepUpdatingLocation			1
 
-#define CONFIG_includeOurLocation	0	// show user location with our custom annotation
-#define CONFIG_includeUserLocation	1	// show standard iOS user location annotation
+#define CONFIG_includeOurLocation			0	// show user location with our custom annotation
+#define CONFIG_includeUserLocation			1	// show standard iOS user location annotation
+
+#define CONFIG_requestLocationAccess_Always	1 // else request 'in-use' access
+
+// NOT YET IMPLEMENTED - MapUserTrail (which would track changing location)
 
 // ----------------------------------------------------------------------
 
@@ -77,6 +80,7 @@ static NSString * const ERR_simulateLocationError =
 
 @property (assign, nonatomic)			MKCoordinateRegion	initialRegion;
 @property (assign, nonatomic)			BOOL				userOverlaysPresent;
+@property (assign, nonatomic)			BOOL				isTrackingLocation;
 
 @end
 
@@ -267,9 +271,15 @@ static NSString * const ERR_simulateLocationError =
 - (void)startTrackingLocation {
 	MyLog(@"\n%s", __FUNCTION__);
 	
+	self.isTrackingLocation = YES;
 	CLAuthorizationStatus status = CLLocationManager.authorizationStatus;
+	
 	if (status == kCLAuthorizationStatusNotDetermined) {
+#if CONFIG_requestLocationAccess_Always
+		[self.locationManager requestAlwaysAuthorization];
+#else
 		[self.locationManager requestWhenInUseAuthorization];
+#endif
 	}
 	else if (status == kCLAuthorizationStatusAuthorizedWhenInUse ||
 			 status == kCLAuthorizationStatusAuthorizedAlways) {
@@ -330,7 +340,7 @@ static NSString * const ERR_simulateLocationError =
 	self.locationManager.delegate = self;
 	self.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters;
 	
-	self.lastStatus = kCLAuthorizationStatusNotDetermined;
+	self.lastStatus = CLLocationManager.authorizationStatus;
 	
 	self.dismissableAlerts = @[].mutableCopy;
 
@@ -472,16 +482,15 @@ didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
 			break;
 
 		case kCLAuthorizationStatusNotDetermined:
-			MyLog(@" requesting access");
-			[self.locationManager requestWhenInUseAuthorization];
 			break;
 
 		case kCLAuthorizationStatusAuthorizedAlways:
 		case kCLAuthorizationStatusAuthorizedWhenInUse:
 			// cancel any 'access denied' alerts
 			[self dismissAlerts];
-			NSLog(@"Got authorization, start tracking location");
-			[self startTrackingLocation];
+			MyLog(@"Got authorization, start tracking location");
+//			[self startTrackingLocation];
+			[self.locationManager startUpdatingLocation];
 			break;
 		default:
 			MyLog(@" ?status? = %@", str_CLAuthorizationStatus(status));
